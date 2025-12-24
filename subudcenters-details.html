@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Center Detail — Wireflow (Approval Draft)</title>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --ink:#111827;
+      --muted:#6b7280;
+      --line:#d1d5db;
+      --soft:#f9fafb;
+      --accent:#2563eb;
+      --ok:#10b981;
+      --warn:#f59e0b;
+      --radius:14px;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:var(--font); background:var(--bg); color:var(--ink);}
+    a{color:inherit}
+    .wrap{max-width:980px; margin:0 auto; padding:22px 16px 64px;}
+
+    /* Header */
+    .topbar{
+      display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+      border-bottom:1px solid var(--line);
+      padding-bottom:12px;
+    }
+    .brand{display:flex; align-items:center; gap:10px;}
+    .logo{
+      width:34px; height:34px; border-radius:999px;
+      border:1px solid var(--line);
+      display:grid; place-items:center;
+      font-weight:900; font-size:13px;
+      background:var(--soft);
+    }
+    .brand b{font-size:14px;}
+    .brand span{display:block; font-size:12px; color:var(--muted); margin-top:2px;}
+    .badge{
+      border:1px solid var(--line);
+      background:var(--soft);
+      border-radius:999px;
+      padding:8px 10px;
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap;
+    }
+
+    /* Breadcrumb */
+    .crumbs{
+      margin: 14px 0 10px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.5;
+    }
+    .crumbs a{color:var(--accent); text-decoration:none; font-weight:700;}
+    .crumbs a:hover{text-decoration:underline;}
+
+    /* Layout */
+    .grid{display:grid; grid-template-columns: 1.25fr .75fr; gap:14px; margin-top:12px;}
+    @media (max-width: 980px){ .grid{grid-template-columns: 1fr;} }
+
+    .card{
+      border:1px dashed var(--line);
+      border-radius:var(--radius);
+      background:#fff;
+      overflow:hidden;
+    }
+    .cardHead{
+      padding:12px 12px 10px;
+      border-bottom:1px dashed var(--line);
+      background:#fff;
+      display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+    }
+    .cardHead b{font-size:13px;}
+    .hint{font-size:12px; color:var(--muted); line-height:1.45;}
+    .cardBody{padding:12px;}
+
+    /* Page title */
+    h1{margin:0; font-size:22px; letter-spacing:-.2px;}
+    .subhead{
+      margin-top:6px;
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.55;
+    }
+
+    /* Wireframe blocks */
+    .wfRow{display:flex; gap:10px; flex-wrap:wrap;}
+    .wfRow > *{flex:1;}
+    .pill{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:5px 8px; border-radius:999px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-size:12px; color:var(--muted);
+      white-space:nowrap;
+    }
+    .dot{width:8px;height:8px;border-radius:99px;background:var(--warn);}
+    .dot.ok{background:var(--ok);}
+
+    .metaList{margin:0; padding-left:18px; font-size:13px; line-height:1.55; color:var(--ink);}
+    .metaList li{margin:7px 0;}
+
+    .mapBox{
+      height: 240px;
+      border:1px dashed var(--line);
+      border-radius:16px;
+      background: repeating-linear-gradient(
+        45deg,
+        #fff,
+        #fff 10px,
+        #fafafa 10px,
+        #fafafa 20px
+      );
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:14px;
+    }
+    .mapBox b{font-size:13px;}
+    .mapBox p{margin:6px 0 0; font-size:12px; color:var(--muted); line-height:1.5; max-width:520px;}
+
+    .btn{
+      width:100%;
+      padding:12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-weight:800;
+      cursor:pointer;
+      font-size:13px;
+    }
+    .btn.primary{
+      background: rgba(37,99,235,.08);
+      color: var(--accent);
+      border-color: rgba(37,99,235,.35);
+    }
+    .btn:active{transform:translateY(1px);}
+
+    /* “Optional fields hidden when empty” demo */
+    .optionalHidden{
+      border:1px solid var(--line);
+      background:var(--soft);
+      border-radius:16px;
+      padding:10px 12px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.55;
+    }
+    .toggleRow{display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;}
+    .toggleRow label{
+      display:flex; align-items:center; gap:8px;
+      font-size:12px; color:var(--muted);
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:8px 10px;
+      background:#fff;
+      cursor:pointer;
+      user-select:none;
+    }
+
+    /* Contact form */
+    input, textarea{
+      width:100%;
+      padding:12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      font-size:14px;
+      outline:none;
+      background:#fff;
+    }
+    textarea{min-height: 110px; resize: vertical;}
+    .field{margin-top:10px;}
+    .field .label{font-size:12px; color:var(--muted); margin: 0 0 6px;}
+    .captcha{
+      border:1px dashed var(--line);
+      border-radius:12px;
+      padding:12px;
+      background:#fff;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      margin-top:10px;
+    }
+    .captcha b{font-size:12px;}
+    .captcha span{font-size:12px; color:var(--muted);}
+
+    .footerNote{
+      margin-top:14px;
+      border-top:1px solid var(--line);
+      padding-top:12px;
+      font-size:12px;
+      color:var(--muted);
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    /* Tiny toast */
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:16px;
+      transform:translateX(-50%);
+      border:1px solid var(--line);
+      background:#111827;
+      color:#fff;
+      padding:10px 12px;
+      border-radius:999px;
+      font-size:12px;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .15s ease;
+      max-width:92vw;
+    }
+    .toast.show{opacity:1;}
+
+    @media print{
+      .badge, .toggleRow, .btn { display:none !important; }
+      .grid{grid-template-columns:1fr;}
+      body{color:#000;}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo">S</div>
+        <div>
+          <b>SubudCenters.com</b>
+          <span>Center Detail Page — Wireflow (Approval Draft)</span>
+        </div>
+      </div>
+      <div class="badge">Spec-aligned • Low fidelity</div>
+    </div>
+
+    <div class="crumbs">
+      <a href="#" onclick="notify('Back to directory (simulated)'); return false;">Home</a>
+      &nbsp;›&nbsp;
+      <a href="#" onclick="notify('Back to interactive map (simulated)'); return false;">Interactive Map</a>
+      &nbsp;›&nbsp;
+      <span>Center Detail</span>
+    </div>
+
+    <div class="grid">
+      <!-- LEFT COLUMN: Public center content -->
+      <section class="card" aria-label="Center information">
+        <div class="cardHead">
+          <div>
+            <b>Center Detail (Public)</b>
+            <div class="hint">Shows all relevant information for one center.</div>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
+            <span class="pill"><span class="dot ok"></span>Public page</span>
+            <span class="pill"><span class="dot"></span>Approval focus</span>
+          </div>
+        </div>
+
+        <div class="cardBody">
+          <h1 id="centerName">Subud Example City Center</h1>
+          <div class="subhead" id="centerAddress">
+            123 Example Street, Example City, Country (Zone X)
+          </div>
+
+          <div style="height:12px;"></div>
+
+          <!-- MAP (auto-generated from address in real build) -->
+          <div class="card" style="border-style:dashed;">
+            <div class="cardHead">
+              <b>Map (Auto-generated)</b>
+              <div class="hint">Generated automatically from the address.</div>
+            </div>
+            <div class="cardBody">
+              <div class="mapBox">
+                <div>
+                  <b>[Map Placeholder]</b>
+                  <p>
+                    Shows the center location. Includes a link to directions via Google Maps (or another free mapping service).
+                  </p>
+                </div>
+              </div>
+              <div style="height:10px;"></div>
+              <button class="btn" type="button" onclick="notify('Open directions (simulated)')">Get Directions</button>
+            </div>
+          </div>
+
+          <div style="height:12px;"></div>
+
+          <!-- LATIHAN SCHEDULE -->
+          <div class="card" style="border-style:dashed;">
+            <div class="cardHead">
+              <b>Latihan Days / Times</b>
+              <div class="hint">Includes time zone.</div>
+            </div>
+            <div class="cardBody">
+              <ul class="metaList" id="schedule">
+                <li><b>Wednesday</b> — 7:00 PM (Local Time) — <b>Time zone:</b> GMT+7</li>
+                <li><b>Saturday</b> — 10:00 AM (Local Time) — <b>Time zone:</b> GMT+7</li>
+              </ul>
+              <div class="optionalHidden">
+                Wireflow note: show multiple sessions if provided. If schedule is missing, show a simple fallback like:
+                “Please contact the center for current Latihan times.”
+              </div>
+            </div>
+          </div>
+
+          <div style="height:12px;"></div>
+
+          <!-- DESCRIPTION (optional) -->
+          <div class="card" style="border-style:dashed;" id="sectionDescription">
+            <div class="cardHead">
+              <b>Description (Optional)</b>
+              <div class="hint">Hidden on public site if empty.</div>
+            </div>
+            <div class="cardBody">
+              <div class="optionalHidden">
+                [Center description text goes here — short introduction, what visitors can expect, accessibility notes, etc.]
+              </div>
+            </div>
+          </div>
+
+          <div style="height:12px;"></div>
+
+          <!-- HISTORY (optional) -->
+          <div class="card" style="border-style:dashed;" id="sectionHistory">
+            <div class="cardHead">
+              <b>History (Optional)</b>
+              <div class="hint">Hidden on public site if empty.</div>
+            </div>
+            <div class="cardBody">
+              <div class="optionalHidden">
+                [Center history text goes here — brief background and milestones.]
+              </div>
+            </div>
+          </div>
+
+          <div style="height:12px;"></div>
+
+          <!-- PHOTOS (optional) -->
+          <div class="card" style="border-style:dashed;" id="sectionPhotos">
+            <div class="cardHead">
+              <b>Photos (Optional)</b>
+              <div class="hint">Hidden on public site if none are provided.</div>
+            </div>
+            <div class="cardBody">
+              <div class="wfRow">
+                <div class="mapBox" style="height:140px;"><div><b>[Photo 1 Placeholder]</b><p>Uploaded by center manager</p></div></div>
+                <div class="mapBox" style="height:140px;"><div><b>[Photo 2 Placeholder]</b><p>Optional</p></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="height:12px;"></div>
+
+          <!-- WEBSITE + SOCIAL (optional) -->
+          <div class="card" style="border-style:dashed;" id="sectionLinks">
+            <div class="cardHead">
+              <b>Website & Social Links (Optional)</b>
+              <div class="hint">Hidden on public site if empty.</div>
+            </div>
+            <div class="cardBody">
+              <ul class="metaList">
+                <li><b>Website:</b> <a href="#" onclick="notify('Open website (simulated)'); return false;">https://example-center.org</a></li>
+                <li><b>Social:</b> <a href="#" onclick="notify('Open social link (simulated)'); return false;">Facebook</a> • <a href="#" onclick="notify('Open social link (simulated)'); return false;">Instagram</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="footerNote">
+            <div><b>Last updated (GMT):</b> <span id="lastUpdated">2025-12-22 10:15 GMT</span></div>
+            <div><a href="#" onclick="notify('Report an issue (future option)'); return false;" style="color:var(--accent); font-weight:800; text-decoration:none;">Report an issue</a></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT COLUMN: Contact form + admin/manager notes -->
+      <aside class="card" aria-label="Contact and notes">
+        <div class="cardHead">
+          <div>
+            <b>Contact This Center (Secure)</b>
+            <div class="hint">Does not expose email addresses publicly.</div>
+          </div>
+        </div>
+        <div class="cardBody">
+          <div class="optionalHidden">
+            This form sends messages directly to the center’s contact email.
+            The email address is never displayed publicly.
+          </div>
+
+          <div class="field">
+            <div class="label">Your name</div>
+            <input type="text" placeholder="Full name" />
+          </div>
+
+          <div class="field">
+            <div class="label">Your email</div>
+            <input type="email" placeholder="name@example.com" />
+          </div>
+
+          <div class="field">
+            <div class="label">Message</div>
+            <textarea placeholder="Write your message..."></textarea>
+          </div>
+
+          <div class="captcha">
+            <div>
+              <b>[Captcha Placeholder]</b><br>
+              <span>Confirm you are not a robot</span>
+            </div>
+            <button class="btn" type="button" style="width:auto;" onclick="notify('Captcha checked (simulated)')">I’m not a robot</button>
+          </div>
+
+          <div style="height:10px;"></div>
+          <button class="btn primary" type="button" onclick="notify('Message submitted (simulated)')">Send Message</button>
+
+          <div style="height:14px;"></div>
+          <div class="optionalHidden">
+            <b>Manager update flow (spec note):</b><br>
+            Center Managers update info via a secure email link (no login). Updates are reviewed and approved by a Global Administrator before going live.
+          </div>
+
+          <div style="height:10px;"></div>
+          <div class="optionalHidden">
+            <b>Optional fields behavior (spec note):</b><br>
+            Empty optional fields are hidden on the public site, but remain visible to Center Managers in the update form for gradual improvements over time.
+          </div>
+
+          <div style="height:10px;"></div>
+
+          <!-- OPTIONAL TOGGLES: to demonstrate "hidden when empty" -->
+          <div class="card" style="border-style:dashed;">
+            <div class="cardHead">
+              <b>Wireflow Controls (for demonstration)</b>
+              <div class="hint">Toggle optional sections on/off</div>
+            </div>
+            <div class="cardBody">
+              <div class="toggleRow">
+                <label><input type="checkbox" checked id="tDesc"> Description present</label>
+                <label><input type="checkbox" checked id="tHist"> History present</label>
+                <label><input type="checkbox" checked id="tPhotos"> Photos present</label>
+                <label><input type="checkbox" checked id="tLinks"> Website/Social present</label>
+              </div>
+              <div style="height:10px;"></div>
+              <button class="btn" type="button" onclick="notify('Center manager form opens via secure email link (simulated)')">
+                Center Manager: Update via Secure Link (Simulated)
+              </button>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const toast = document.getElementById('toast');
+    function notify(msg){
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(notify._t);
+      notify._t = setTimeout(() => toast.classList.remove('show'), 1400);
+    }
+
+    // Optional sections toggle (spec: hide if empty)
+    const sectionDescription = document.getElementById('sectionDescription');
+    const sectionHistory = document.getElementById('sectionHistory');
+    const sectionPhotos = document.getElementById('sectionPhotos');
+    const sectionLinks = document.getElementById('sectionLinks');
+
+    const tDesc = document.getElementById('tDesc');
+    const tHist = document.getElementById('tHist');
+    const tPhotos = document.getElementById('tPhotos');
+    const tLinks = document.getElementById('tLinks');
+
+    function applyOptionalVisibility(){
+      sectionDescription.style.display = tDesc.checked ? 'block' : 'none';
+      sectionHistory.style.display = tHist.checked ? 'block' : 'none';
+      sectionPhotos.style.display = tPhotos.checked ? 'block' : 'none';
+      sectionLinks.style.display = tLinks.checked ? 'block' : 'none';
+    }
+    [tDesc, tHist, tPhotos, tLinks].forEach(el => el.addEventListener('change', applyOptionalVisibility));
+    applyOptionalVisibility();
+  </script>
+</body>
+</html>
