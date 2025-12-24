@@ -1,0 +1,713 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Center Manager Update Form — Secure Link (Wireframe)</title>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --ink:#111827;
+      --muted:#6b7280;
+      --line:#d1d5db;
+      --soft:#f9fafb;
+      --accent:#2563eb;
+      --ok:#10b981;
+      --warn:#f59e0b;
+      --bad:#ef4444;
+      --radius:14px;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:var(--font); background:var(--bg); color:var(--ink);}
+    a{color:inherit}
+    .wrap{max-width:1100px; margin:0 auto; padding:18px 16px 64px;}
+
+    /* Topbar */
+    .topbar{
+      display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;
+      border-bottom:1px solid var(--line);
+      padding-bottom:12px;
+    }
+    .brand{display:flex; align-items:center; gap:10px;}
+    .logo{
+      width:34px; height:34px; border-radius:999px;
+      border:1px solid var(--line);
+      display:grid; place-items:center;
+      font-weight:900; font-size:13px;
+      background:var(--soft);
+    }
+    .brand b{font-size:14px;}
+    .brand span{display:block; font-size:12px; color:var(--muted); margin-top:2px; line-height:1.4;}
+    .badgeRow{display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:flex-end;}
+    .pill{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:6px 10px; border-radius:999px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-size:12px; color:var(--muted);
+      white-space:nowrap;
+    }
+    .dot{width:8px; height:8px; border-radius:99px; background:var(--warn);}
+    .dot.ok{background:var(--ok);}
+    .dot.bad{background:var(--bad);}
+
+    /* Layout */
+    .grid{display:grid; grid-template-columns: 1fr 360px; gap:14px; margin-top:14px;}
+    @media (max-width: 980px){ .grid{grid-template-columns:1fr;} }
+
+    /* Cards */
+    .card{
+      border:1px dashed var(--line);
+      border-radius:var(--radius);
+      background:#fff;
+      overflow:hidden;
+    }
+    .cardHead{
+      padding:12px 12px 10px;
+      border-bottom:1px dashed var(--line);
+      background:#fff;
+      display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+    }
+    .cardHead b{font-size:13px;}
+    .hint{font-size:12px; color:var(--muted); line-height:1.45;}
+    .cardBody{padding:12px;}
+
+    /* Form */
+    .section{
+      border:1px dashed var(--line);
+      border-radius:16px;
+      padding:12px;
+      margin-bottom:12px;
+      background:#fff;
+    }
+    .sectionTitle{
+      display:flex; align-items:flex-start; justify-content:space-between; gap:10px; flex-wrap:wrap;
+      margin-bottom:10px;
+    }
+    .sectionTitle b{font-size:13px;}
+    .sectionTitle span{font-size:12px; color:var(--muted); line-height:1.45;}
+
+    .row{display:flex; gap:10px; flex-wrap:wrap;}
+    .row > *{flex:1;}
+    .field{margin-top:10px;}
+    .label{
+      font-size:12px;
+      color:var(--muted);
+      margin:0 0 6px;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    .label .req{font-weight:800; color:var(--bad);}
+    input, textarea, select{
+      width:100%;
+      padding:12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      font-size:14px;
+      outline:none;
+      background:#fff;
+      color:var(--ink);
+    }
+    textarea{min-height:110px; resize:vertical;}
+    .help{
+      margin-top:6px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.5;
+    }
+    .inlineMsg{
+      margin-top:10px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:var(--soft);
+      padding:10px 12px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.5;
+    }
+
+    /* Schedule table-ish */
+    .table{
+      border:1px dashed var(--line);
+      border-radius:14px;
+      overflow:hidden;
+      background:#fff;
+    }
+    .tRow{
+      display:grid;
+      grid-template-columns: 1.1fr 1fr 1fr 90px;
+      gap:8px;
+      padding:10px 10px;
+      border-top:1px dashed #e5e7eb;
+      align-items:center;
+    }
+    .tRow:first-child{border-top:0;}
+    .tHead{
+      background:var(--soft);
+      font-size:12px;
+      color:var(--muted);
+      font-weight:800;
+    }
+    .tRow input, .tRow select{
+      padding:10px;
+      border-radius:10px;
+      font-size:13px;
+    }
+    .miniBtn{
+      padding:10px;
+      border-radius:10px;
+      border:1px solid var(--line);
+      background:#fff;
+      cursor:pointer;
+      font-weight:800;
+      font-size:12px;
+      width:100%;
+    }
+    .miniBtn.danger{border-color:rgba(239,68,68,.35); background:rgba(239,68,68,.06); color:var(--bad);}
+    .miniBtn:active{transform:translateY(1px);}
+
+    /* Sidebar actions */
+    .actions{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      position:sticky;
+      top:12px;
+      align-self:start;
+    }
+    .btn{
+      padding:12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:#fff;
+      cursor:pointer;
+      font-weight:900;
+      font-size:13px;
+      width:100%;
+      text-align:center;
+    }
+    .btn.primary{background:rgba(37,99,235,.08); color:var(--accent); border-color:rgba(37,99,235,.35);}
+    .btn.ok{background:rgba(16,185,129,.10); color:var(--ok); border-color:rgba(16,185,129,.35);}
+    .btn.warn{background:rgba(245,158,11,.12); color:#92400e; border-color:rgba(245,158,11,.35);}
+    .btn.danger{background:rgba(239,68,68,.08); color:var(--bad); border-color:rgba(239,68,68,.35);}
+    .btn:active{transform:translateY(1px);}
+
+    .statusBox{
+      border:1px dashed var(--line);
+      border-radius:16px;
+      padding:12px;
+      background:#fff;
+    }
+    .statusBox b{font-size:13px;}
+    .statusBox .k{color:var(--muted); font-size:12px; margin-top:6px; line-height:1.45;}
+    .statusGrid{display:grid; grid-template-columns: 1fr; gap:8px; margin-top:10px;}
+    .kv{
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px 10px;
+      background:var(--soft);
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.45;
+    }
+    .kv b{color:var(--ink);}
+    .kv code{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+
+    /* Toast */
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:16px;
+      transform:translateX(-50%);
+      border:1px solid var(--line);
+      background:#111827;
+      color:#fff;
+      padding:10px 12px;
+      border-radius:999px;
+      font-size:12px;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .15s ease;
+      max-width:92vw;
+      z-index:60;
+    }
+    .toast.show{opacity:1;}
+
+    @media print{
+      .badgeRow, .actions, .btn, .miniBtn { display:none !important; }
+      body{color:#000;}
+      .grid{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo">S</div>
+        <div>
+          <b>Center Manager Update Form</b>
+          <span>Secure link access (no login) • Submit changes for admin review/approval</span>
+        </div>
+      </div>
+      <div class="badgeRow">
+        <span class="pill"><span class="dot ok"></span>Secure link</span>
+        <span class="pill"><span class="dot"></span>Wireframe</span>
+        <span class="pill"><span class="dot" style="background:#9ca3af;"></span>No public email shown</span>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- MAIN FORM -->
+      <main>
+        <div class="card">
+          <div class="cardHead">
+            <div>
+              <b>Center: Subud Example City Center</b>
+              <div class="hint">
+                Update the fields below and submit for review. Optional fields may be left blank.
+              </div>
+            </div>
+            <div class="hint" style="text-align:right;">
+              Link expires: <b>7 days</b><br/>
+              Token: <code>SECURE-XXXX-XXXX</code>
+            </div>
+          </div>
+
+          <div class="cardBody">
+            <!-- BASIC INFO -->
+            <div class="section" aria-label="Basic information">
+              <div class="sectionTitle">
+                <b>Basic Information</b>
+                <span>Required fields should be kept accurate.</span>
+              </div>
+
+              <div class="row">
+                <div class="field">
+                  <div class="label">
+                    Center name <span class="req">*</span>
+                  </div>
+                  <input id="fName" value="Subud Example City Center" />
+                </div>
+                <div class="field">
+                  <div class="label">
+                    Country <span class="req">*</span>
+                  </div>
+                  <select id="fCountry">
+                    <option>— Select country —</option>
+                    <option selected>Exampleland</option>
+                    <option>Othercountry</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="field">
+                  <div class="label">
+                    City / Region <span class="req">*</span>
+                  </div>
+                  <input id="fCity" value="Example City" />
+                  <div class="help">Use the exact City/Region wording stored in the database (not boundary polygons).</div>
+                </div>
+
+                <div class="field">
+                  <div class="label">
+                    Zone (read-only)
+                  </div>
+                  <input value="Zone X (auto-derived)" disabled />
+                  <div class="help">Zone is derived by admin/database rules.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- LOCATION -->
+            <div class="section" aria-label="Location and map">
+              <div class="sectionTitle">
+                <b>Location</b>
+                <span>Map is generated automatically from the address (no manual map pins).</span>
+              </div>
+
+              <div class="field">
+                <div class="label">
+                  Address <span class="req">*</span>
+                </div>
+                <textarea id="fAddress">123 Example Street
+Example City, Exampleland 12345</textarea>
+                <div class="help">
+                  Keep the address as complete as possible. It will be used to generate the map location.
+                </div>
+              </div>
+
+              <div class="row" style="margin-top:10px;">
+                <button class="btn" type="button" onclick="notify('Map preview refreshed (simulated)')">Refresh Map Preview</button>
+                <button class="btn" type="button" onclick="notify('Open directions tool (simulated)')">Test Directions Link</button>
+              </div>
+
+              <!-- NEW: PRECISE LOCATION (LAT/LNG) -->
+              <div class="inlineMsg" style="margin-top:12px;">
+                <b>Precise location (optional)</b><br/>
+                If the map pin is not accurate using address-only, you can enter precise coordinates.
+                Admin will review before publishing.
+              </div>
+
+              <div class="row" style="margin-top:10px;">
+                <div class="field" style="margin-top:0;">
+                  <div class="label">Latitude (optional)</div>
+                  <input id="fLat" inputmode="decimal" placeholder="e.g., -6.200000" />
+                  <div class="help">Format: decimal degrees (WGS84). Range: -90 to 90.</div>
+                </div>
+                <div class="field" style="margin-top:0;">
+                  <div class="label">Longitude (optional)</div>
+                  <input id="fLng" inputmode="decimal" placeholder="e.g., 106.816666" />
+                  <div class="help">Format: decimal degrees (WGS84). Range: -180 to 180.</div>
+                </div>
+              </div>
+
+              <div class="row" style="margin-top:10px;">
+                <button class="btn primary" type="button" onclick="applyCoordinates()">Apply Coordinates to Map Preview</button>
+                <button class="btn" type="button" onclick="clearCoordinates()">Clear Coordinates</button>
+              </div>
+
+              <div class="inlineMsg" id="coordStatus">
+                <b>Map preview placeholder:</b> In the public center page, a map will be generated from this address automatically.
+              </div>
+            </div>
+
+            <!-- LATIHAN SCHEDULE -->
+            <div class="section" aria-label="Latihan schedule">
+              <div class="sectionTitle">
+                <b>Latihan Days / Times</b>
+                <span>Multiple sessions allowed. Include local time and time zone.</span>
+              </div>
+
+              <div class="row">
+                <div class="field">
+                  <div class="label">
+                    Time zone <span class="req">*</span>
+                  </div>
+                  <select id="fTZ">
+                    <option>— Select time zone —</option>
+                    <option selected>GMT+7</option>
+                    <option>GMT+0</option>
+                    <option>GMT-5</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <div class="label">Schedule note (optional)</div>
+                  <input id="fSchedNote" placeholder="e.g., Please contact us for latest times during holidays" />
+                </div>
+              </div>
+
+              <div class="table" role="table" aria-label="Schedule table">
+                <div class="tRow tHead" role="row">
+                  <div role="columnheader">Day</div>
+                  <div role="columnheader">Time (Local)</div>
+                  <div role="columnheader">Notes (Optional)</div>
+                  <div role="columnheader">Action</div>
+                </div>
+
+                <div class="tRow" role="row" data-srow>
+                  <select aria-label="Day">
+                    <option>Monday</option><option>Tuesday</option><option selected>Wednesday</option>
+                    <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+                  </select>
+                  <input aria-label="Time" value="19:00" />
+                  <input aria-label="Notes" placeholder="e.g., Men/Women separate (optional)" />
+                  <button class="miniBtn danger" type="button" onclick="removeRow(this)">Remove</button>
+                </div>
+
+                <div class="tRow" role="row" data-srow>
+                  <select aria-label="Day">
+                    <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+                    <option>Thursday</option><option>Friday</option><option selected>Saturday</option><option>Sunday</option>
+                  </select>
+                  <input aria-label="Time" value="10:00" />
+                  <input aria-label="Notes" placeholder="Optional notes" />
+                  <button class="miniBtn danger" type="button" onclick="removeRow(this)">Remove</button>
+                </div>
+              </div>
+
+              <div style="height:10px;"></div>
+              <button class="btn" type="button" onclick="addRow()">Add another session</button>
+
+              <div class="help">
+                If no schedule is provided, the public page will show a fallback message such as: “Please contact the center for current Latihan times.”
+              </div>
+            </div>
+
+            <!-- CONTACT ROUTING (NOT PUBLIC) -->
+            <div class="section" aria-label="Contact email routing">
+              <div class="sectionTitle">
+                <b>Contact Routing (Not Public)</b>
+                <span>The public site uses a contact form and does not display email addresses.</span>
+              </div>
+
+              <div class="row">
+                <div class="field">
+                  <div class="label">
+                    Center contact email (private) <span class="req">*</span>
+                  </div>
+                  <input id="fEmail" type="email" value="center@example.org" />
+                  <div class="help">
+                    This email will receive messages from the public “Contact This Center” form. It will not be shown publicly.
+                  </div>
+                </div>
+                <div class="field">
+                  <div class="label">Phone (optional)</div>
+                  <input id="fPhone" placeholder="+62 812-xxxx-xxxx" />
+                </div>
+              </div>
+
+              <div class="inlineMsg">
+                <b>Anti-spam note:</b> Public contact form includes captcha; this manager form does not.
+              </div>
+            </div>
+
+            <!-- CONTENT (OPTIONAL FIELDS SHOWN HERE EVEN IF EMPTY) -->
+            <div class="section" aria-label="Description and history">
+              <div class="sectionTitle">
+                <b>Center Content (Optional)</b>
+                <span>Optional fields are visible here for gradual improvements, even if blank.</span>
+              </div>
+
+              <div class="field">
+                <div class="label">Description (optional)</div>
+                <textarea id="fDesc" placeholder="Short introduction for visitors..."></textarea>
+              </div>
+
+              <div class="field">
+                <div class="label">History (optional)</div>
+                <textarea id="fHist" placeholder="Brief history of the center..."></textarea>
+              </div>
+
+              <div class="field">
+                <div class="label">Visitor notes (optional)</div>
+                <textarea id="fNotes" placeholder="Accessibility, parking, entry instructions, etc."></textarea>
+              </div>
+            </div>
+
+            <!-- CHANGE NOTES -->
+            <div class="section" aria-label="Change notes">
+              <div class="sectionTitle">
+                <b>Change Notes (Required for submission)</b>
+                <span>Helps the administrator review and approve updates.</span>
+              </div>
+
+              <div class="field">
+                <div class="label">What changed? <span class="req">*</span></div>
+                <textarea id="fChangeNote" placeholder="Example: Updated address and changed latihan time. Added latitude/longitude for more accurate map pin."></textarea>
+                <div class="help">Briefly explain your changes so the admin can review quickly.</div>
+              </div>
+            </div>
+
+            <div class="inlineMsg">
+              <b>Submission behavior (wireframe):</b> When submitted, changes go to an administrator for review/approval before appearing on the public site.
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- SIDEBAR -->
+      <aside class="actions">
+        <div class="statusBox">
+          <b>Update Status</b>
+          <div class="k">This is a secure link for Center Managers (no login required).</div>
+
+          <div class="statusGrid">
+            <div class="kv"><b>Current status:</b> Draft (not submitted)</div>
+            <div class="kv"><b>Last saved:</b> <span id="lastSaved">Not saved yet</span></div>
+            <div class="kv"><b>Public page:</b> <a href="#" onclick="notify('Open public center page (simulated)'); return false;" style="color:var(--accent); font-weight:900; text-decoration:none;">View current public page</a></div>
+            <div class="kv"><b>Security:</b> Do not forward this link. Token: <code>SECURE-XXXX-XXXX</code></div>
+          </div>
+        </div>
+
+        <button class="btn" type="button" onclick="saveDraft()">Save Draft</button>
+        <button class="btn primary" type="button" onclick="notify('Preview changes (simulated)')">Preview Changes</button>
+        <button class="btn ok" type="button" onclick="submitForReview()">Submit for Review</button>
+        <button class="btn warn" type="button" onclick="notify('Resend secure link email (simulated)')">Resend Secure Link</button>
+        <button class="btn danger" type="button" onclick="notify('Cancel changes and revert (simulated)')">Cancel / Revert</button>
+
+        <div class="statusBox">
+          <b>Validation (wireframe)</b>
+          <div class="k">Submission requires required fields + change notes.</div>
+          <div class="statusGrid" id="validationBox"></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const toast = document.getElementById('toast');
+    const validationBox = document.getElementById('validationBox');
+    const lastSaved = document.getElementById('lastSaved');
+    const coordStatus = document.getElementById('coordStatus');
+
+    function notify(msg){
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(notify._t);
+      notify._t = setTimeout(() => toast.classList.remove('show'), 1400);
+    }
+    function nowStamp(){
+      const d = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+    function val(id){ return (document.getElementById(id).value || "").trim(); }
+
+    function isNumberLike(x){
+      if (!x) return false;
+      const n = Number(x);
+      return Number.isFinite(n);
+    }
+
+    function validateCoords(){
+      const lat = val('fLat');
+      const lng = val('fLng');
+
+      // coords are optional: only validate if one is present
+      if (!lat && !lng) return { ok:true, msg:"No coordinates provided (address-only mapping)." };
+      if (!isNumberLike(lat) || !isNumberLike(lng)) return { ok:false, msg:"Latitude and Longitude must be valid decimal numbers." };
+
+      const la = Number(lat), lo = Number(lng);
+      if (la < -90 || la > 90) return { ok:false, msg:"Latitude must be between -90 and 90." };
+      if (lo < -180 || lo > 180) return { ok:false, msg:"Longitude must be between -180 and 180." };
+
+      return { ok:true, msg:`Coordinates provided: (${la.toFixed(6)}, ${lo.toFixed(6)}).` };
+    }
+
+    function applyCoordinates(){
+      const res = validateCoords();
+      if (!res.ok){
+        coordStatus.innerHTML = `<b>Precise location:</b> ${res.msg}`;
+        coordStatus.style.borderColor = "rgba(239,68,68,.35)";
+        coordStatus.style.background = "rgba(239,68,68,.06)";
+        notify("Invalid coordinates");
+        validate();
+        return;
+      }
+      if (!val('fLat') && !val('fLng')){
+        coordStatus.innerHTML = `<b>Map preview placeholder:</b> Using address-only mapping (no coordinates provided).`;
+        coordStatus.style.borderColor = "";
+        coordStatus.style.background = "";
+        notify("Using address-only mapping");
+        validate();
+        return;
+      }
+
+      coordStatus.innerHTML =
+        `<b>Precise location applied (wireframe):</b> ${res.msg} Map pin would use coordinates (admin-reviewed).`;
+      coordStatus.style.borderColor = "rgba(37,99,235,.35)";
+      coordStatus.style.background = "rgba(37,99,235,.08)";
+      notify("Coordinates applied");
+      validate();
+    }
+
+    function clearCoordinates(){
+      document.getElementById('fLat').value = "";
+      document.getElementById('fLng').value = "";
+      coordStatus.innerHTML = `<b>Map preview placeholder:</b> In the public center page, a map will be generated from this address automatically.`;
+      coordStatus.style.borderColor = "";
+      coordStatus.style.background = "";
+      notify("Coordinates cleared");
+      validate();
+    }
+
+    function validate(){
+      const issues = [];
+
+      if (!val('fName')) issues.push("Center name is required.");
+      if (!val('fCountry') || val('fCountry') === "— Select country —") issues.push("Country is required.");
+      if (!val('fCity')) issues.push("City/Region is required.");
+      if (!val('fAddress')) issues.push("Address is required.");
+      if (!val('fTZ') || val('fTZ') === "— Select time zone —") issues.push("Time zone is required.");
+      if (!val('fEmail')) issues.push("Private contact email is required (not shown publicly).");
+      if (!val('fChangeNote')) issues.push("Change notes are required for submission.");
+
+      const c = validateCoords();
+      if (!c.ok) issues.push(c.msg);
+
+      renderValidation(issues);
+      return issues;
+    }
+
+    function renderValidation(issues){
+      if (issues.length === 0){
+        validationBox.innerHTML = `<div class="kv"><b>OK:</b> Ready to submit.</div>`;
+        return;
+      }
+      validationBox.innerHTML = issues.map(i => `<div class="kv"><b>Needs attention:</b> ${escapeHtml(i)}</div>`).join('');
+    }
+
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function saveDraft(){
+      validate();
+      lastSaved.textContent = `${nowStamp()} (local)`;
+      notify("Draft saved (simulated)");
+    }
+
+    function submitForReview(){
+      const issues = validate();
+      if (issues.length > 0){
+        notify("Cannot submit: please fix required fields");
+        return;
+      }
+      notify("Submitted for admin review (simulated)");
+    }
+
+    function addRow(){
+      const table = document.querySelector('.table');
+      const row = document.createElement('div');
+      row.className = 'tRow';
+      row.setAttribute('role','row');
+      row.setAttribute('data-srow','');
+
+      row.innerHTML = `
+        <select aria-label="Day">
+          <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
+          <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+        </select>
+        <input aria-label="Time" placeholder="e.g., 19:00" />
+        <input aria-label="Notes" placeholder="Optional notes" />
+        <button class="miniBtn danger" type="button">Remove</button>
+      `;
+      row.querySelector('button').addEventListener('click', () => {
+        row.remove();
+        validate();
+        notify("Schedule row removed");
+      });
+      table.appendChild(row);
+      validate();
+      notify("Schedule row added");
+    }
+
+    function removeRow(btn){
+      const row = btn.closest('[data-srow]');
+      if (row) row.remove();
+      validate();
+      notify("Schedule row removed");
+    }
+
+    // live validation on key fields
+    ['fName','fCity','fAddress','fTZ','fEmail','fChangeNote','fLat','fLng'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', validate);
+    });
+    document.getElementById('fCountry').addEventListener('change', validate);
+
+    // init
+    validate();
+  </script>
+</body>
+</html>

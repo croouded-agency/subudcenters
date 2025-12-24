@@ -1,0 +1,1000 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Global Administrator Dashboard — Wireframe (Feature 3)</title>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --ink:#111827;
+      --muted:#6b7280;
+      --line:#d1d5db;
+      --soft:#f9fafb;
+      --accent:#2563eb;
+      --ok:#10b981;
+      --warn:#f59e0b;
+      --bad:#ef4444;
+      --radius:14px;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:var(--font); color:var(--ink); background:var(--bg);}
+    a{color:inherit}
+    .wrap{max-width:1200px; margin:0 auto; padding:18px 16px 60px;}
+
+    /* Topbar */
+    .topbar{
+      display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;
+      border-bottom:1px solid var(--line);
+      padding-bottom:12px;
+    }
+    .brand{display:flex; gap:10px; align-items:center;}
+    .logo{
+      width:34px; height:34px; border-radius:999px;
+      border:1px solid var(--line);
+      display:grid; place-items:center;
+      background:var(--soft);
+      font-weight:900; font-size:13px;
+    }
+    .brand b{font-size:14px;}
+    .brand span{display:block; font-size:12px; color:var(--muted); margin-top:2px; line-height:1.4;}
+    .badgeRow{display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:flex-end;}
+    .pill{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:6px 10px; border-radius:999px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-size:12px; color:var(--muted);
+      white-space:nowrap;
+    }
+    .dot{width:8px; height:8px; border-radius:99px; background:var(--warn);}
+    .dot.ok{background:var(--ok);}
+    .dot.bad{background:var(--bad);}
+
+    /* Tabs */
+    .tabs{
+      margin-top:12px;
+      display:flex; gap:8px; flex-wrap:wrap;
+    }
+    .tab{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:999px;
+      padding:10px 12px;
+      font-size:13px;
+      font-weight:900;
+      cursor:pointer;
+      color:var(--muted);
+    }
+    .tab.active{
+      color:var(--accent);
+      border-color:rgba(37,99,235,.35);
+      background:rgba(37,99,235,.08);
+    }
+
+    /* Cards / layout */
+    .grid{display:grid; grid-template-columns: 1fr 420px; gap:14px; margin-top:14px;}
+    @media (max-width: 1020px){ .grid{grid-template-columns:1fr;} }
+
+    .card{
+      border:1px dashed var(--line);
+      border-radius:var(--radius);
+      background:#fff;
+      overflow:hidden;
+    }
+    .cardHead{
+      padding:12px 12px 10px;
+      border-bottom:1px dashed var(--line);
+      background:#fff;
+      display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+    }
+    .cardHead b{font-size:13px;}
+    .hint{font-size:12px; color:var(--muted); line-height:1.45;}
+    .cardBody{padding:12px;}
+
+    /* Controls */
+    .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+    .row > *{flex:1;}
+    input, select, textarea{
+      width:100%;
+      padding:12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      font-size:14px;
+      outline:none;
+      background:#fff;
+      color:var(--ink);
+    }
+    textarea{min-height:92px; resize:vertical;}
+    .btn{
+      padding:12px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:#fff;
+      cursor:pointer;
+      font-weight:900;
+      font-size:13px;
+      text-align:center;
+      width:100%;
+    }
+    .btn.primary{background:rgba(37,99,235,.08); color:var(--accent); border-color:rgba(37,99,235,.35);}
+    .btn.ok{background:rgba(16,185,129,.10); color:var(--ok); border-color:rgba(16,185,129,.35);}
+    .btn.warn{background:rgba(245,158,11,.12); color:#92400e; border-color:rgba(245,158,11,.35);}
+    .btn.danger{background:rgba(239,68,68,.08); color:var(--bad); border-color:rgba(239,68,68,.35);}
+    .btn:active{transform:translateY(1px);}
+    .btn.inline{width:auto; white-space:nowrap;}
+
+    /* Table */
+    .table{
+      border:1px dashed var(--line);
+      border-radius:14px;
+      overflow:hidden;
+      background:#fff;
+    }
+    .tRow{
+      display:grid;
+      grid-template-columns: 1.2fr 1fr 1fr 130px 140px;
+      gap:8px;
+      padding:10px 10px;
+      border-top:1px dashed #e5e7eb;
+      align-items:center;
+    }
+    .tRow:first-child{border-top:0;}
+    .tHead{
+      background:var(--soft);
+      font-size:12px;
+      color:var(--muted);
+      font-weight:900;
+    }
+    .tCell{font-size:13px; color:var(--ink); line-height:1.35;}
+    .tCell.muted{color:var(--muted); font-size:12px;}
+    .tRow.clickable{cursor:pointer;}
+    .tRow.clickable:hover{background:var(--soft);}
+    .status{
+      display:inline-flex; align-items:center; gap:6px;
+      padding:5px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      font-size:12px;
+      color:var(--muted);
+      background:#fff;
+      white-space:nowrap;
+      width:max-content;
+    }
+    .status .sDot{width:8px; height:8px; border-radius:99px; background:#9ca3af;}
+    .status.pending .sDot{background:var(--warn);}
+    .status.approved .sDot{background:var(--ok);}
+    .status.rejected .sDot{background:var(--bad);}
+    .status.overdue .sDot{background:var(--bad);}
+    .status.incomplete .sDot{background:var(--warn);}
+
+    /* Right detail */
+    .detailBlock{
+      border:1px dashed var(--line);
+      border-radius:14px;
+      padding:12px;
+      background:#fff;
+      margin-top:12px;
+    }
+    .detailBlock:first-child{margin-top:0;}
+    .kv{
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:var(--soft);
+      padding:10px 10px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.45;
+      margin-top:10px;
+    }
+    .kv b{color:var(--ink);}
+    .mini{
+      font-size:12px; color:var(--muted); line-height:1.45;
+    }
+    .diff{
+      border:1px dashed var(--line);
+      border-radius:12px;
+      padding:10px;
+      background:#fff;
+      margin-top:10px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.5;
+    }
+    .diff b{color:var(--ink);}
+
+    /* Modal */
+    .modalBackdrop{
+      position:fixed; inset:0;
+      background:rgba(0,0,0,.55);
+      display:none; align-items:center; justify-content:center;
+      padding:16px; z-index:50;
+    }
+    .modalBackdrop.open{display:flex;}
+    .modal{
+      width:min(980px, 100%);
+      max-height:min(88vh, 880px);
+      background:#fff;
+      border-radius:18px;
+      overflow:hidden;
+      border:1px solid rgba(0,0,0,.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+    }
+    .modalHead{
+      padding:12px;
+      background:var(--soft);
+      border-bottom:1px solid var(--line);
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+    .modalHead b{font-size:13px;}
+    .modalBody{padding:12px; overflow:auto; max-height:calc(88vh - 56px);}
+
+    /* Toast */
+    .toast{
+      position:fixed; left:50%; bottom:16px; transform:translateX(-50%);
+      border:1px solid var(--line);
+      background:#111827; color:#fff;
+      padding:10px 12px;
+      border-radius:999px;
+      font-size:12px;
+      opacity:0; pointer-events:none;
+      transition:opacity .15s ease;
+      max-width:92vw;
+      z-index:60;
+    }
+    .toast.show{opacity:1;}
+
+    @media print{
+      .badgeRow, .tabs, .btn, .modalBackdrop { display:none !important; }
+      .grid{grid-template-columns:1fr;}
+      body{color:#000;}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo">S</div>
+        <div>
+          <b>Global Administrator Dashboard</b>
+          <span>Review & approval workflow • Edit centers • Manage contact emails • Track verification</span>
+        </div>
+      </div>
+      <div class="badgeRow">
+        <span class="pill"><span class="dot ok"></span>Secure admin login</span>
+        <span class="pill"><span class="dot"></span>Wireframe</span>
+        <span class="pill"><span class="dot bad"></span>Admin-only</span>
+      </div>
+    </div>
+
+    <div class="tabs" role="tablist" aria-label="Admin dashboard tabs">
+      <button class="tab active" data-tab="overview" role="tab" aria-selected="true">Overview</button>
+      <button class="tab" data-tab="pending" role="tab" aria-selected="false">Pending Updates</button>
+      <button class="tab" data-tab="centers" role="tab" aria-selected="false">Centers</button>
+      <button class="tab" data-tab="contacts" role="tab" aria-selected="false">Center Contacts</button>
+      <button class="tab" data-tab="import" role="tab" aria-selected="false">Upload / Import</button>
+      <button class="tab" data-tab="verification" role="tab" aria-selected="false">Verification Tracking</button>
+      <button class="tab" data-tab="export" role="tab" aria-selected="false">Export</button>
+    </div>
+
+    <div class="grid">
+      <!-- LEFT: Main list area -->
+      <main class="card" aria-label="Main panel">
+        <div class="cardHead">
+          <div>
+            <b id="mainTitle">Overview</b>
+            <div class="hint" id="mainHint">Quick snapshots and action shortcuts.</div>
+          </div>
+          <div class="hint" style="text-align:right;">
+            Admin: <b>Global Administrator</b><br/>
+            Session: <b>Active</b>
+          </div>
+        </div>
+
+        <div class="cardBody">
+          <!-- OVERVIEW -->
+          <section id="panel-overview">
+            <div class="row">
+              <div class="kv">
+                <b>Pending submissions</b><br/>
+                3 awaiting approval
+                <div class="mini" style="margin-top:6px;">Open “Pending Updates” to review changes.</div>
+              </div>
+              <div class="kv">
+                <b>Overdue verifications</b><br/>
+                4 centers not verified in 3+ months
+                <div class="mini" style="margin-top:6px;">Open “Verification Tracking” to follow up.</div>
+              </div>
+              <div class="kv">
+                <b>Incomplete records</b><br/>
+                5 centers missing key fields
+                <div class="mini" style="margin-top:6px;">Open “Centers” and filter by “Incomplete”.</div>
+              </div>
+            </div>
+
+            <div style="height:12px;"></div>
+
+            <div class="detailBlock">
+              <b>Shortcuts</b>
+              <div class="mini" style="margin-top:6px;">Common admin tasks.</div>
+              <div class="row" style="margin-top:10px;">
+                <button class="btn primary inline" type="button" onclick="goTab('pending')">Review Pending Updates</button>
+                <button class="btn inline" type="button" onclick="goTab('centers')">Search Centers</button>
+                <button class="btn inline" type="button" onclick="goTab('import')">Upload / Import Data</button>
+                <button class="btn inline" type="button" onclick="goTab('verification')">Send Verification Emails</button>
+              </div>
+            </div>
+
+            <div class="detailBlock">
+              <b>Recent activity (placeholder)</b>
+              <div class="diff">
+                • 2025-12-22 10:15 GMT — Center update submitted: <b>Subud Example City Center</b><br/>
+                • 2025-12-21 08:03 GMT — Verification sent: <b>Subud Sample Town Center</b><br/>
+                • 2025-12-20 14:44 GMT — Manual edit by admin: <b>Subud North Region Center</b>
+              </div>
+            </div>
+          </section>
+
+          <!-- PENDING UPDATES -->
+          <section id="panel-pending" style="display:none;">
+            <div class="row">
+              <input id="qPending" type="search" placeholder="Search pending submissions (center name, country, city)..." />
+              <select id="pendingFilter">
+                <option value="all">Status: All</option>
+                <option value="pending" selected>Awaiting Approval</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+              </select>
+              <button class="btn inline" type="button" onclick="notify('Bulk actions (simulated)')">Bulk Actions</button>
+            </div>
+
+            <div style="height:12px;"></div>
+
+            <div class="table" role="table" aria-label="Pending submissions table">
+              <div class="tRow tHead" role="row">
+                <div role="columnheader">Center</div>
+                <div role="columnheader">Country</div>
+                <div role="columnheader">Submitted</div>
+                <div role="columnheader">Status</div>
+                <div role="columnheader">Action</div>
+              </div>
+
+              <div class="tRow clickable" role="row" data-pending="1" onclick="selectPending(1)">
+                <div class="tCell"><b>Subud Example City Center</b><div class="tCell muted">Example City</div></div>
+                <div class="tCell">Exampleland</div>
+                <div class="tCell">2025-12-22 10:15 GMT</div>
+                <div class="tCell"><span class="status pending"><span class="sDot"></span>Awaiting</span></div>
+                <div class="tCell">
+                  <button class="btn inline ok" type="button" onclick="event.stopPropagation(); approvePending(1)">Approve</button>
+                </div>
+              </div>
+
+              <div class="tRow clickable" role="row" data-pending="2" onclick="selectPending(2)">
+                <div class="tCell"><b>Subud Sample Town Center</b><div class="tCell muted">Sample Town</div></div>
+                <div class="tCell">Samplestan</div>
+                <div class="tCell">2025-12-21 18:02 GMT</div>
+                <div class="tCell"><span class="status pending"><span class="sDot"></span>Awaiting</span></div>
+                <div class="tCell">
+                  <button class="btn inline ok" type="button" onclick="event.stopPropagation(); approvePending(2)">Approve</button>
+                </div>
+              </div>
+
+              <div class="tRow clickable" role="row" data-pending="3" onclick="selectPending(3)">
+                <div class="tCell"><b>Subud North Region Center</b><div class="tCell muted">North Region</div></div>
+                <div class="tCell">Northland</div>
+                <div class="tCell">2025-12-20 09:40 GMT</div>
+                <div class="tCell"><span class="status pending"><span class="sDot"></span>Awaiting</span></div>
+                <div class="tCell">
+                  <button class="btn inline ok" type="button" onclick="event.stopPropagation(); approvePending(3)">Approve</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- CENTERS -->
+          <section id="panel-centers" style="display:none;">
+            <div class="row">
+              <input id="qCenters" type="search" placeholder="Search centers (name, country, city)..." />
+              <select id="centerFilter">
+                <option value="all" selected>Filter: All centers</option>
+                <option value="incomplete">Incomplete records</option>
+                <option value="overdue">Overdue verification</option>
+              </select>
+              <button class="btn inline" type="button" onclick="openCenterEditor()">New Center (Manual)</button>
+            </div>
+
+            <div style="height:12px;"></div>
+
+            <div class="table" role="table" aria-label="Centers table">
+              <div class="tRow tHead" role="row">
+                <div role="columnheader">Center</div>
+                <div role="columnheader">Country</div>
+                <div role="columnheader">Last updated (GMT)</div>
+                <div role="columnheader">Data quality</div>
+                <div role="columnheader">Action</div>
+              </div>
+
+              <div class="tRow clickable" role="row" data-center="C1" onclick="selectCenter('C1')">
+                <div class="tCell"><b>Subud Example City Center</b><div class="tCell muted">Example City</div></div>
+                <div class="tCell">Exampleland</div>
+                <div class="tCell">2025-12-22 10:15</div>
+                <div class="tCell"><span class="status"><span class="sDot" style="background:var(--ok)"></span>Complete</span></div>
+                <div class="tCell"><button class="btn inline primary" type="button" onclick="event.stopPropagation(); openCenterEditor('C1')">Edit</button></div>
+              </div>
+
+              <div class="tRow clickable" role="row" data-center="C2" onclick="selectCenter('C2')">
+                <div class="tCell"><b>Subud Sample Town Center</b><div class="tCell muted">Sample Town</div></div>
+                <div class="tCell">Samplestan</div>
+                <div class="tCell">2025-09-10 07:20</div>
+                <div class="tCell"><span class="status incomplete"><span class="sDot"></span>Incomplete</span></div>
+                <div class="tCell"><button class="btn inline primary" type="button" onclick="event.stopPropagation(); openCenterEditor('C2')">Edit</button></div>
+              </div>
+
+              <div class="tRow clickable" role="row" data-center="C3" onclick="selectCenter('C3')">
+                <div class="tCell"><b>Subud North Region Center</b><div class="tCell muted">North Region</div></div>
+                <div class="tCell">Northland</div>
+                <div class="tCell">2025-08-01 12:00</div>
+                <div class="tCell"><span class="status overdue"><span class="sDot"></span>Overdue</span></div>
+                <div class="tCell"><button class="btn inline primary" type="button" onclick="event.stopPropagation(); openCenterEditor('C3')">Edit</button></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- CONTACTS -->
+          <section id="panel-contacts" style="display:none;">
+            <div class="row">
+              <input id="qContacts" type="search" placeholder="Search contacts (center, email)..." />
+              <select id="contactFilter">
+                <option value="all" selected>Status: All</option>
+                <option value="ok">Deliverable</option>
+                <option value="bounce">Bounced</option>
+                <option value="missing">Missing email</option>
+              </select>
+              <button class="btn inline" type="button" onclick="notify('Add contact (simulated)')">Add Contact</button>
+            </div>
+
+            <div style="height:12px;"></div>
+
+            <div class="table" role="table" aria-label="Contacts table">
+              <div class="tRow tHead" role="row" style="grid-template-columns: 1.2fr 1.2fr 1fr 130px 140px;">
+                <div role="columnheader">Center</div>
+                <div role="columnheader">Contact email (private)</div>
+                <div role="columnheader">Last email sent</div>
+                <div role="columnheader">Delivery</div>
+                <div role="columnheader">Action</div>
+              </div>
+
+              <div class="tRow clickable" role="row" onclick="selectContact('E1')" style="grid-template-columns: 1.2fr 1.2fr 1fr 130px 140px;">
+                <div class="tCell"><b>Subud Example City Center</b></div>
+                <div class="tCell">center@example.org</div>
+                <div class="tCell">2025-12-21</div>
+                <div class="tCell"><span class="status approved"><span class="sDot"></span>OK</span></div>
+                <div class="tCell"><button class="btn inline" type="button" onclick="event.stopPropagation(); notify('Edit email (simulated)')">Edit</button></div>
+              </div>
+
+              <div class="tRow clickable" role="row" onclick="selectContact('E2')" style="grid-template-columns: 1.2fr 1.2fr 1fr 130px 140px;">
+                <div class="tCell"><b>Subud Sample Town Center</b></div>
+                <div class="tCell">contact@sample.tld</div>
+                <div class="tCell">2025-12-21</div>
+                <div class="tCell"><span class="status rejected"><span class="sDot"></span>Bounced</span></div>
+                <div class="tCell"><button class="btn inline warn" type="button" onclick="event.stopPropagation(); notify('Resend / follow up (simulated)')">Follow up</button></div>
+              </div>
+
+              <div class="tRow clickable" role="row" onclick="selectContact('E3')" style="grid-template-columns: 1.2fr 1.2fr 1fr 130px 140px;">
+                <div class="tCell"><b>Subud North Region Center</b></div>
+                <div class="tCell muted">— missing —</div>
+                <div class="tCell muted">—</div>
+                <div class="tCell"><span class="status pending"><span class="sDot"></span>Missing</span></div>
+                <div class="tCell"><button class="btn inline primary" type="button" onclick="event.stopPropagation(); notify('Add email (simulated)')">Add</button></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- IMPORT -->
+          <section id="panel-import" style="display:none;">
+            <div class="detailBlock">
+              <b>Upload / Modify Center Data (Importer)</b>
+              <div class="mini" style="margin-top:6px;">
+                Upload a CSV/Excel using the fixed template. Non-matching columns are ignored. Existing records update only differing fields.
+              </div>
+
+              <div class="row" style="margin-top:10px;">
+                <input type="file" />
+                <button class="btn inline primary" type="button" onclick="notify('File uploaded (simulated)')">Upload</button>
+                <button class="btn inline" type="button" onclick="notify('Template downloaded (simulated)')">Download Template</button>
+              </div>
+
+              <div class="diff">
+                <b>Import preview (placeholder)</b><br/>
+                • New centers: 2<br/>
+                • Updates: 5 (fields changed only)<br/>
+                • Ignored columns: 3 (not in template)<br/>
+                <div class="mini" style="margin-top:6px;">No data is deleted by import.</div>
+              </div>
+
+              <div class="row" style="margin-top:10px;">
+                <button class="btn ok inline" type="button" onclick="notify('Import executed (simulated)')">Run Import</button>
+                <button class="btn danger inline" type="button" onclick="notify('Import canceled (simulated)')">Cancel</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- VERIFICATION -->
+          <section id="panel-verification" style="display:none;">
+            <div class="row">
+              <input id="qVerify" type="search" placeholder="Search centers (name, country, city)..." />
+              <select id="verifyFilter">
+                <option value="all" selected>Show: All</option>
+                <option value="overdue">Overdue (3+ months)</option>
+                <option value="awaiting">Awaiting response</option>
+                <option value="verified">Recently verified</option>
+              </select>
+              <button class="btn inline primary" type="button" onclick="notify('Verification emails sent (simulated)')">Send Verification Emails</button>
+            </div>
+
+            <div style="height:12px;"></div>
+
+            <div class="table" role="table" aria-label="Verification table">
+              <div class="tRow tHead" role="row" style="grid-template-columns: 1.2fr 1fr 1fr 140px 140px;">
+                <div role="columnheader">Center</div>
+                <div role="columnheader">Last verified</div>
+                <div role="columnheader">Last email</div>
+                <div role="columnheader">Response status</div>
+                <div role="columnheader">Action</div>
+              </div>
+
+              <div class="tRow clickable" role="row" onclick="selectVerify('V1')" style="grid-template-columns: 1.2fr 1fr 1fr 140px 140px;">
+                <div class="tCell"><b>Subud North Region Center</b></div>
+                <div class="tCell">2025-08-01</div>
+                <div class="tCell">2025-12-01</div>
+                <div class="tCell"><span class="status overdue"><span class="sDot"></span>Overdue</span></div>
+                <div class="tCell"><button class="btn inline warn" type="button" onclick="event.stopPropagation(); notify('Manual follow-up (simulated)')">Follow up</button></div>
+              </div>
+
+              <div class="tRow clickable" role="row" onclick="selectVerify('V2')" style="grid-template-columns: 1.2fr 1fr 1fr 140px 140px;">
+                <div class="tCell"><b>Subud Sample Town Center</b></div>
+                <div class="tCell">2025-09-10</div>
+                <div class="tCell">2025-12-01</div>
+                <div class="tCell"><span class="status pending"><span class="sDot"></span>Awaiting</span></div>
+                <div class="tCell"><button class="btn inline" type="button" onclick="event.stopPropagation(); notify('Resend email (simulated)')">Resend</button></div>
+              </div>
+
+              <div class="tRow clickable" role="row" onclick="selectVerify('V3')" style="grid-template-columns: 1.2fr 1fr 1fr 140px 140px;">
+                <div class="tCell"><b>Subud Example City Center</b></div>
+                <div class="tCell">2025-12-21</div>
+                <div class="tCell">2025-12-01</div>
+                <div class="tCell"><span class="status approved"><span class="sDot"></span>Verified</span></div>
+                <div class="tCell"><button class="btn inline" type="button" onclick="event.stopPropagation(); notify('View record (simulated)')">View</button></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- EXPORT -->
+          <section id="panel-export" style="display:none;">
+            <div class="detailBlock">
+              <b>Administrative Data Export (On Demand)</b>
+              <div class="mini" style="margin-top:6px;">
+                Export includes approved and published center information (for backup, reporting, or future integration).
+              </div>
+
+              <div class="row" style="margin-top:10px;">
+                <select>
+                  <option selected>Export format: CSV</option>
+                  <option>Export format: Excel</option>
+                  <option>Export format: JSON</option>
+                </select>
+                <select>
+                  <option selected>Data scope: Approved & Published only</option>
+                  <option>Data scope: Include pending submissions (admin-only)</option>
+                </select>
+              </div>
+
+              <div class="row" style="margin-top:10px;">
+                <button class="btn primary inline" type="button" onclick="notify('Export generated (simulated)')">Generate Export</button>
+                <button class="btn inline" type="button" onclick="notify('Export history (simulated)')">View Export History</button>
+              </div>
+
+              <div class="diff">
+                <b>Export history (placeholder)</b><br/>
+                • 2025-12-20 — centers_export.csv — generated by Global Admin<br/>
+                • 2025-11-15 — centers_export.csv — generated by Global Admin
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <!-- RIGHT: Detail / actions -->
+      <aside class="card" aria-label="Detail panel">
+        <div class="cardHead">
+          <div>
+            <b>Detail & Actions</b>
+            <div class="hint">Select an item to review, approve/reject, or edit directly.</div>
+          </div>
+          <button class="btn inline" type="button" onclick="notify('Notifications settings (simulated)')">Settings</button>
+        </div>
+
+        <div class="cardBody">
+          <div class="detailBlock" id="detailEmpty">
+            <b>No selection</b>
+            <div class="mini" style="margin-top:6px;">
+              Choose a row from the active tab (Pending Updates / Centers / Contacts / Verification).
+            </div>
+          </div>
+
+          <!-- Pending detail -->
+          <div class="detailBlock" id="detailPending" style="display:none;">
+            <b>Pending submission review</b>
+            <div class="mini" style="margin-top:6px;">
+              Compare submitted changes to current approved data. Approve, reject, or edit directly before approval.
+            </div>
+
+            <div class="kv" id="pendingMeta">
+              <b>Center:</b> —<br/>
+              <b>Submitted:</b> —<br/>
+              <b>Status:</b> —
+            </div>
+
+            <div class="diff" id="pendingDiff">
+              <b>Change diff (placeholder)</b><br/>
+              • Address: “Old address…” → “New address…”<br/>
+              • Latihan: “Wed 19:00” → “Wed 19:30”<br/>
+              • Website: (empty) → “https://example-center.org”
+            </div>
+
+            <div class="row" style="margin-top:10px;">
+              <button class="btn ok inline" type="button" onclick="approveSelected()">Approve</button>
+              <button class="btn danger inline" type="button" onclick="openRejectModal()">Reject</button>
+              <button class="btn primary inline" type="button" onclick="openCenterEditor()">Edit Before Approving</button>
+            </div>
+
+            <div class="kv">
+              <b>Admin notes</b><br/>
+              Ensure accuracy, completeness, and formatting consistency before publishing.
+            </div>
+          </div>
+
+          <!-- Center detail -->
+          <div class="detailBlock" id="detailCenter" style="display:none;">
+            <b>Center record</b>
+            <div class="mini" style="margin-top:6px;">Manual edits apply to the approved record (admin-only).</div>
+
+            <div class="kv" id="centerMeta">
+              <b>Center:</b> —<br/>
+              <b>Country:</b> —<br/>
+              <b>Last updated:</b> —
+            </div>
+
+            <div class="row" style="margin-top:10px;">
+              <button class="btn primary inline" type="button" onclick="openCenterEditor()">Edit Center</button>
+              <button class="btn inline" type="button" onclick="notify('Open public page (simulated)')">View Public Page</button>
+            </div>
+
+            <div class="kv">
+              <b>Flags</b><br/>
+              <span class="mini">Examples: missing schedule / missing address / overdue verification / bounced email.</span>
+            </div>
+          </div>
+
+          <!-- Contact detail -->
+          <div class="detailBlock" id="detailContact" style="display:none;">
+            <b>Center contact email</b>
+            <div class="mini" style="margin-top:6px;">Private routing email used by secure update links and contact delivery.</div>
+
+            <div class="kv" id="contactMeta">
+              <b>Center:</b> —<br/>
+              <b>Email:</b> —<br/>
+              <b>Delivery:</b> —
+            </div>
+
+            <div class="row" style="margin-top:10px;">
+              <button class="btn primary inline" type="button" onclick="notify('Edit contact email (simulated)')">Edit Email</button>
+              <button class="btn inline warn" type="button" onclick="notify('Manual follow-up needed (simulated)')">Follow Up</button>
+            </div>
+          </div>
+
+          <!-- Verification detail -->
+          <div class="detailBlock" id="detailVerify" style="display:none;">
+            <b>Verification status</b>
+            <div class="mini" style="margin-top:6px;">Track last verified and response status; send reminders as needed.</div>
+
+            <div class="kv" id="verifyMeta">
+              <b>Center:</b> —<br/>
+              <b>Last verified:</b> —<br/>
+              <b>Status:</b> —
+            </div>
+
+            <div class="row" style="margin-top:10px;">
+              <button class="btn primary inline" type="button" onclick="notify('Resend verification email (simulated)')">Resend Email</button>
+              <button class="btn inline warn" type="button" onclick="notify('Manual follow-up (simulated)')">Manual Follow-Up</button>
+              <button class="btn inline" type="button" onclick="openCenterEditor()">Open Center</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Center Editor Modal -->
+  <div class="modalBackdrop" id="centerModal">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Center editor">
+      <div class="modalHead">
+        <b>Center Editor (Admin)</b>
+        <button class="btn inline" type="button" onclick="closeModal('centerModal')">Close ✕</button>
+      </div>
+      <div class="modalBody">
+        <div class="card" style="border-style:dashed;">
+          <div class="cardHead">
+            <div>
+              <b>Edit Center Information (Direct)</b>
+              <div class="hint">Admin can edit any center’s information directly.</div>
+            </div>
+            <div class="hint" style="text-align:right;">
+              Mode: <b>Manual edit</b><br/>
+              Publishes: <b>Immediately to approved record</b> (simulated)
+            </div>
+          </div>
+          <div class="cardBody">
+            <div class="row">
+              <input id="eName" placeholder="Center name" value="Subud Example City Center" />
+              <input id="eCountry" placeholder="Country" value="Exampleland" />
+            </div>
+
+            <div class="row" style="margin-top:10px;">
+              <input id="eCity" placeholder="City / Region" value="Example City" />
+              <input id="eTZ" placeholder="Time zone" value="GMT+7" />
+            </div>
+
+            <div style="margin-top:10px;">
+              <textarea id="eAddress" placeholder="Address">123 Example Street
+Example City, Exampleland 12345</textarea>
+              <div class="hint" style="margin-top:6px;">Map is generated from address. No manual pin entry.</div>
+            </div>
+
+            <div class="row" style="margin-top:10px;">
+              <input id="eWebsite" placeholder="Website (optional)" value="https://example-center.org" />
+              <input id="eSocial" placeholder="Social links (optional)" value="Facebook • Instagram" />
+            </div>
+
+            <div style="margin-top:10px;">
+              <textarea id="eAdminNote" placeholder="Admin note (not public)">Edited schedule formatting and corrected address.</textarea>
+            </div>
+
+            <div class="row" style="margin-top:10px;">
+              <button class="btn inline" type="button" onclick="notify('Map preview refreshed (simulated)')">Refresh Map Preview</button>
+              <button class="btn inline" type="button" onclick="notify('Save draft (simulated)')">Save Draft</button>
+              <button class="btn ok inline" type="button" onclick="notify('Saved to approved record (simulated)')">Save Changes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reject Modal -->
+  <div class="modalBackdrop" id="rejectModal">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="Reject submission">
+      <div class="modalHead">
+        <b>Reject Submission (Admin)</b>
+        <button class="btn inline" type="button" onclick="closeModal('rejectModal')">Close ✕</button>
+      </div>
+      <div class="modalBody">
+        <div class="detailBlock">
+          <b>Reason (required)</b>
+          <div class="mini" style="margin-top:6px;">Used to request clarification or explain why changes were not approved.</div>
+          <textarea id="rejectReason" placeholder="Example: Address is incomplete. Please include street + postal code."></textarea>
+          <div class="row" style="margin-top:10px;">
+            <button class="btn danger inline" type="button" onclick="rejectSelected()">Reject</button>
+            <button class="btn inline" type="button" onclick="closeModal('rejectModal')">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const toast = document.getElementById('toast');
+    function notify(msg){
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(notify._t);
+      notify._t = setTimeout(() => toast.classList.remove('show'), 1400);
+    }
+
+    // Tabs
+    const tabBtns = document.querySelectorAll('.tab');
+    const panels = {
+      overview: document.getElementById('panel-overview'),
+      pending: document.getElementById('panel-pending'),
+      centers: document.getElementById('panel-centers'),
+      contacts: document.getElementById('panel-contacts'),
+      import: document.getElementById('panel-import'),
+      verification: document.getElementById('panel-verification'),
+      export: document.getElementById('panel-export')
+    };
+    const mainTitle = document.getElementById('mainTitle');
+    const mainHint = document.getElementById('mainHint');
+
+    const tabMeta = {
+      overview: ["Overview", "Quick snapshots and action shortcuts."],
+      pending: ["Pending Updates", "Review updates submitted by center managers. Approve or reject before publication."],
+      centers: ["Centers", "View and edit any center’s information directly. Identify incomplete or overdue records."],
+      contacts: ["Center Contacts", "Manage the list of center manager contact emails (private). Track bounces/missing."],
+      import: ["Upload / Import", "Upload or modify center data using the fixed spreadsheet template."],
+      verification: ["Verification Tracking", "Track verification timestamps and response status. Send reminders."],
+      export: ["Export", "Generate administrative exports of approved/published center data."]
+    };
+
+    function goTab(key){
+      tabBtns.forEach(b => b.classList.toggle('active', b.dataset.tab === key));
+      Object.entries(panels).forEach(([k, el]) => el.style.display = (k === key) ? 'block' : 'none');
+      mainTitle.textContent = tabMeta[key][0];
+      mainHint.textContent = tabMeta[key][1];
+      clearDetail();
+    }
+
+    tabBtns.forEach(btn => btn.addEventListener('click', () => goTab(btn.dataset.tab)));
+
+    // Detail panel states
+    const detailEmpty = document.getElementById('detailEmpty');
+    const detailPending = document.getElementById('detailPending');
+    const detailCenter = document.getElementById('detailCenter');
+    const detailContact = document.getElementById('detailContact');
+    const detailVerify = document.getElementById('detailVerify');
+
+    function showDetail(which){
+      [detailEmpty, detailPending, detailCenter, detailContact, detailVerify].forEach(el => el.style.display = 'none');
+      which.style.display = 'block';
+    }
+    function clearDetail(){
+      selected.pendingId = null;
+      selected.centerId = null;
+      selected.contactId = null;
+      selected.verifyId = null;
+      showDetail(detailEmpty);
+    }
+
+    // Selected state
+    const selected = { pendingId:null, centerId:null, contactId:null, verifyId:null };
+
+    // Pending selection + actions
+    const pendingMeta = document.getElementById('pendingMeta');
+    const pendingDiff = document.getElementById('pendingDiff');
+
+    const pendingData = {
+      1: {center:"Subud Example City Center", submitted:"2025-12-22 10:15 GMT", status:"Awaiting", country:"Exampleland", diff:[
+        ["Address","Old address…","123 Example Street, Example City…"],
+        ["Latihan","Wed 19:00","Wed 19:30"],
+        ["Website","(empty)","https://example-center.org"]
+      ]},
+      2: {center:"Subud Sample Town Center", submitted:"2025-12-21 18:02 GMT", status:"Awaiting", country:"Samplestan", diff:[
+        ["Contact email","old@sample.tld","contact@sample.tld"],
+        ["Schedule note","(empty)","Please contact us during holidays"]
+      ]},
+      3: {center:"Subud North Region Center", submitted:"2025-12-20 09:40 GMT", status:"Awaiting", country:"Northland", diff:[
+        ["City/Region","North Reg.","North Region"],
+        ["History","(empty)","Founded in 1978…"]
+      ]}
+    };
+
+    function selectPending(id){
+      selected.pendingId = id;
+      const d = pendingData[id];
+      pendingMeta.innerHTML = `<b>Center:</b> ${escapeHtml(d.center)}<br/><b>Submitted:</b> ${escapeHtml(d.submitted)}<br/><b>Status:</b> ${escapeHtml(d.status)}`;
+      pendingDiff.innerHTML = `<b>Change diff (placeholder)</b><br/>` + d.diff.map(x =>
+        `• <b>${escapeHtml(x[0])}</b>: “${escapeHtml(x[1])}” → “${escapeHtml(x[2])}”`
+      ).join("<br/>");
+      showDetail(detailPending);
+      notify("Pending submission selected");
+    }
+
+    function approvePending(id){
+      selectPending(id);
+      approveSelected();
+    }
+
+    function approveSelected(){
+      if (!selected.pendingId){ notify("Select a pending submission first"); return; }
+      notify("Approved (simulated) — changes would now be published");
+      // In real build: mark submission approved + apply changes to approved record.
+    }
+
+    function openRejectModal(){
+      if (!selected.pendingId){ notify("Select a pending submission first"); return; }
+      document.getElementById('rejectReason').value = "";
+      openModal('rejectModal');
+    }
+
+    function rejectSelected(){
+      if (!selected.pendingId){ notify("Select a pending submission first"); return; }
+      const reason = (document.getElementById('rejectReason').value || "").trim();
+      if (!reason){ notify("Reject reason required"); return; }
+      closeModal('rejectModal');
+      notify("Rejected (simulated) — clarification would be requested");
+      // In real build: mark rejected + notify center manager (email).
+    }
+
+    // Centers selection
+    const centerMeta = document.getElementById('centerMeta');
+    const centerData = {
+      C1: {center:"Subud Example City Center", country:"Exampleland", updated:"2025-12-22 10:15 GMT"},
+      C2: {center:"Subud Sample Town Center", country:"Samplestan", updated:"2025-09-10 07:20 GMT"},
+      C3: {center:"Subud North Region Center", country:"Northland", updated:"2025-08-01 12:00 GMT"}
+    };
+
+    function selectCenter(id){
+      selected.centerId = id;
+      const d = centerData[id];
+      centerMeta.innerHTML = `<b>Center:</b> ${escapeHtml(d.center)}<br/><b>Country:</b> ${escapeHtml(d.country)}<br/><b>Last updated:</b> ${escapeHtml(d.updated)}`;
+      showDetail(detailCenter);
+      notify("Center selected");
+    }
+
+    // Contacts selection
+    const contactMeta = document.getElementById('contactMeta');
+    function selectContact(id){
+      selected.contactId = id;
+      const map = {
+        E1: {center:"Subud Example City Center", email:"center@example.org", delivery:"OK"},
+        E2: {center:"Subud Sample Town Center", email:"contact@sample.tld", delivery:"Bounced"},
+        E3: {center:"Subud North Region Center", email:"— missing —", delivery:"Missing"}
+      };
+      const d = map[id];
+      contactMeta.innerHTML = `<b>Center:</b> ${escapeHtml(d.center)}<br/><b>Email:</b> ${escapeHtml(d.email)}<br/><b>Delivery:</b> ${escapeHtml(d.delivery)}`;
+      showDetail(detailContact);
+      notify("Contact selected");
+    }
+
+    // Verification selection
+    const verifyMeta = document.getElementById('verifyMeta');
+    function selectVerify(id){
+      selected.verifyId = id;
+      const map = {
+        V1: {center:"Subud North Region Center", last:"2025-08-01", status:"Overdue"},
+        V2: {center:"Subud Sample Town Center", last:"2025-09-10", status:"Awaiting response"},
+        V3: {center:"Subud Example City Center", last:"2025-12-21", status:"Verified"}
+      };
+      const d = map[id];
+      verifyMeta.innerHTML = `<b>Center:</b> ${escapeHtml(d.center)}<br/><b>Last verified:</b> ${escapeHtml(d.last)}<br/><b>Status:</b> ${escapeHtml(d.status)}`;
+      showDetail(detailVerify);
+      notify("Verification item selected");
+    }
+
+    // Modals
+    function openModal(id){
+      document.getElementById(id).classList.add('open');
+    }
+    function closeModal(id){
+      document.getElementById(id).classList.remove('open');
+    }
+    document.getElementById('centerModal').addEventListener('click', (e) => {
+      if (e.target.id === 'centerModal') closeModal('centerModal');
+    });
+    document.getElementById('rejectModal').addEventListener('click', (e) => {
+      if (e.target.id === 'rejectModal') closeModal('rejectModal');
+    });
+
+    function openCenterEditor(){
+      openModal('centerModal');
+      notify("Center editor opened");
+    }
+
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    // Init
+    goTab('overview');
+  </script>
+</body>
+</html>

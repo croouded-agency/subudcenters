@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Search Results — Wireflow (Approval Draft)</title>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --ink:#111827;
+      --muted:#6b7280;
+      --line:#e5e7eb;
+      --soft:#f9fafb;
+      --accent:#2563eb;
+      --radius:14px;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; background:var(--bg); color:var(--ink);
+      font-family:var(--font);
+    }
+    .wrap{max-width:980px; margin:0 auto; padding:24px 16px 48px;}
+    header{
+      display:flex; justify-content:space-between; align-items:center;
+      border-bottom:1px solid var(--line); padding-bottom:14px;
+    }
+    .brand{font-weight:900; letter-spacing:.2px;}
+    .crumbs{
+      margin:10px 0 18px; color:var(--muted); font-size:13px;
+    }
+    .crumbs a{color:var(--accent); text-decoration:none; font-weight:800;}
+    h1{margin:0 0 6px; font-size:26px;}
+    .sub{color:var(--muted); font-size:14px; line-height:1.45;}
+    .card{
+      border:1px dashed #d1d5db;
+      background:#fff; padding:16px; border-radius:16px;
+      margin:18px 0;
+    }
+    .label{font-size:12px; color:var(--muted); margin-bottom:10px;}
+    .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+    input[type="search"], select{
+      flex:1; min-width:240px;
+      padding:12px 12px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      font-size:14px;
+      outline:none;
+      background:#fff;
+    }
+    select{min-width:220px}
+    input[type="search"]:focus, select:focus{border-color:#93c5fd; box-shadow:0 0 0 4px rgba(37,99,235,.08);}
+    .btn{
+      padding:12px 14px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:#fff;
+      cursor:pointer;
+      font-weight:800;
+      font-size:14px;
+      white-space:nowrap;
+    }
+    .btn.primary{
+      background:var(--accent);
+      border-color:var(--accent);
+      color:#fff;
+      min-width:140px;
+    }
+    .btn.ghost{
+      background:#fff;
+      border:1px solid var(--line);
+      min-width:220px;
+    }
+
+    .results{
+      border:1px dashed #d1d5db; border-radius:16px;
+      padding:14px; margin-top:18px;
+    }
+    .resultsHdr{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;}
+    .resultsHdr .title{font-weight:900;}
+    .item{
+      display:flex; justify-content:space-between; align-items:center;
+      padding:14px 12px; border-radius:12px;
+      border:1px solid var(--line);
+      background:#fff;
+      cursor:pointer;
+      transition:background .15s ease;
+      margin-top:10px;
+    }
+    .item:hover{background:var(--soft);}
+    .name{font-weight:900; margin:0 0 4px;}
+    .meta{margin:0; color:var(--muted); font-size:13px;}
+    .action{color:var(--accent); font-weight:900;}
+    .empty{
+      padding:16px;
+      border-radius:12px;
+      background:var(--soft);
+      color:var(--muted);
+      border:1px solid var(--line);
+      line-height:1.5;
+    }
+    footer{
+      border-top:1px solid var(--line);
+      margin-top:24px;
+      padding-top:14px;
+      display:flex; justify-content:space-between; align-items:center;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    /* Toast */
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:16px;
+      transform:translateX(-50%);
+      border:1px solid var(--line);
+      background:#fff;
+      padding:10px 12px;
+      border-radius:999px;
+      color:var(--ink);
+      box-shadow:0 10px 28px rgba(17,24,39,.12);
+      opacity:0; pointer-events:none; transition:opacity .18s ease;
+      max-width:92vw;
+    }
+    .toast.show{opacity:1;}
+
+    /* State helpers */
+    .help{font-size:12px; color:var(--muted); margin-top:6px; line-height:1.4;}
+    .help.error{color:#b91c1c;}
+    .fieldError{border-color:#ef4444 !important;}
+
+    /* Disabled button */
+    .btn[disabled]{opacity:.6; cursor:not-allowed;}
+    .btn[aria-busy="true"]{position:relative;}
+    .btn[aria-busy="true"]::after{
+      content:"";
+      display:inline-block;
+      width:12px;height:12px;
+      margin-left:8px;
+      border:2px solid currentColor;
+      border-right-color:transparent;
+      border-radius:999px;
+      vertical-align:-2px;
+      animation:spin .7s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* Typeahead */
+    .typeaheadWrap{position:relative; flex:1; min-width:260px;}
+    .suggest{
+      position:absolute; left:0; right:0; top:calc(100% + 6px);
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:#fff;
+      overflow:hidden;
+      box-shadow:0 10px 24px rgba(17,24,39,.08);
+      z-index:20;
+      display:none;
+    }
+    .suggest.show{display:block;}
+    .suggest button{
+      width:100%;
+      padding:10px 12px;
+      text-align:left;
+      background:#fff;
+      border:0;
+      border-top:1px solid #f3f4f6;
+      cursor:pointer;
+      font-size:13px;
+    }
+    .suggest button:first-child{border-top:0;}
+    .suggest button:hover, .suggest button[aria-selected="true"]{background:var(--soft);}
+
+    /* Skeleton rows */
+    .skeleton{padding:12px;}
+    .skelRow{
+      height:14px;
+      border-radius:999px;
+      background:linear-gradient(90deg,#f3f4f6,#e5e7eb,#f3f4f6);
+      background-size:200% 100%;
+      animation:shimmer 1.1s infinite;
+      margin:10px 0;
+    }
+    @keyframes shimmer{0%{background-position:0% 0} 100%{background-position:-200% 0}}
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">SubudCenters.com</div>
+      <div class="sub">Search Results — Wireflow (Approval Draft)</div>
+    </header>
+
+    <div class="crumbs">
+      <a href="#" onclick="notify('Back to Home (simulated)'); return false;">Home</a>
+      &nbsp;›&nbsp; Search Results
+    </div>
+
+    <h1>Search Results</h1>
+    <div class="sub">
+      Results for <b id="qLabel">“Jakarta”</b>
+      <span id="countLabel" style="margin-left:8px; color:var(--muted);"></span>
+    </div>
+    <div id="applied" class="sub" style="margin-top:8px;"></div>
+
+    <!-- Search + refinements -->
+    <div class="card">
+      <div class="label">Refine your search</div>
+
+      <div class="row">
+        <div class="typeaheadWrap">
+          <input id="q" type="search" placeholder="Search by city or country" value="Jakarta" autocomplete="off" />
+          <div id="suggest" class="suggest" role="listbox" aria-label="Suggestions"></div>
+          <div id="qHelp" class="help">Type at least 2 characters to search.</div>
+        </div>
+        <button id="btnSearch" class="btn primary" type="button" onclick="runSearch(true)">Search</button>
+      </div>
+
+      <div style="height:10px;"></div>
+
+      <div class="row">
+        <select id="fCountry">
+          <option value="">Country: All</option>
+          <option>Indonesia</option>
+          <option>Australia</option>
+          <option>United Kingdom</option>
+          <option>United States</option>
+        </select>
+
+        <select id="fCity">
+          <option value="">City/Region: All</option>
+        </select>
+
+        <button class="btn ghost" type="button" onclick="notify('View results on map (simulated) — using current filters')">
+          View results on map
+        </button>
+      </div>
+    </div>
+
+    <!-- Results list -->
+    <div class="results">
+      <div class="sub" style="margin-bottom:8px;">Click a center to view details.</div>
+      <div class="resultsHdr">
+        <div class="title">Centers</div>
+        <div class="sub"><span id="listCount">0</span></div>
+      </div>
+      <div id="listBody"></div>
+    </div>
+
+    <footer>
+      <div>© SubudCenters.com</div>
+      <div>Contact • Disclaimer • Admin</div>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+  const toast = document.getElementById('toast');
+  function notify(msg){
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(notify._t);
+    notify._t = setTimeout(() => toast.classList.remove('show'), 1400);
+  }
+
+  // Dummy center DB for wireflow
+  const db = [
+    { id:"ID-JKT-01", name:"Subud Jakarta Center", country:"Indonesia", city:"Jakarta", zone:"Zone 1 & 2" },
+    { id:"ID-BDG-01", name:"Subud Bandung Center", country:"Indonesia", city:"Bandung", zone:"Zone 1 & 2" },
+    { id:"AU-SYD-01", name:"Subud Sydney Center", country:"Australia", city:"Sydney", zone:"Zone 1 & 2" },
+    { id:"GB-LON-01", name:"Subud London Center", country:"United Kingdom", city:"London", zone:"Zone 3" },
+    { id:"US-NYC-01", name:"Subud New York Center", country:"United States", city:"New York", zone:"Zone 5" }
+  ];
+
+  const qEl = document.getElementById('q');
+  const qHelp = document.getElementById('qHelp');
+  const suggestEl = document.getElementById('suggest');
+  const btnSearch = document.getElementById('btnSearch');
+
+  const qLabel = document.getElementById('qLabel');
+  const countLabel = document.getElementById('countLabel');
+  const fCountry = document.getElementById('fCountry');
+  const fCity = document.getElementById('fCity');
+  const listBody = document.getElementById('listBody');
+  const listCount = document.getElementById('listCount');
+  const applied = document.getElementById('applied');
+
+  let suggestIndex = -1;
+  let lastSuggest = [];
+
+  function escapeHtml(str){
+    return String(str)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function setLoading(isLoading){
+    btnSearch.disabled = isLoading;
+    btnSearch.setAttribute('aria-busy', isLoading ? 'true' : 'false');
+    btnSearch.textContent = isLoading ? 'Searching' : 'Search';
+
+    if (isLoading){
+      listBody.innerHTML = `
+        <div class="skeleton" aria-label="Loading results">
+          <div class="skelRow" style="width:55%"></div>
+          <div class="skelRow" style="width:80%"></div>
+          <div class="skelRow" style="width:62%"></div>
+        </div>
+      `;
+    }
+  }
+
+  function setValidation(message){
+    if (message){
+      qHelp.textContent = message;
+      qHelp.classList.add('error');
+      qEl.classList.add('fieldError');
+    } else {
+      qHelp.textContent = 'Type at least 2 characters to search.';
+      qHelp.classList.remove('error');
+      qEl.classList.remove('fieldError');
+    }
+  }
+
+  function renderError(){
+    listBody.innerHTML = `
+      <div class="empty">
+        <b>We couldn’t load results.</b><br/>
+        Please try again.
+        <div style="margin-top:10px;" class="row">
+          <button class="btn primary" type="button" onclick="runSearch(true)">Try again</button>
+          <button class="btn" type="button" onclick="notify('Back to Home (simulated)')">Back to Home</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function buildCityOptions(items){
+    const cities = Array.from(new Set(items.map(x => x.city))).sort();
+    fCity.innerHTML = `<option value="">City/Region: All</option>` + cities.map(c =>
+      `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`
+    ).join("");
+  }
+
+  function filterDB(){
+    const q = (qEl.value || "").trim().toLowerCase();
+    const c = fCountry.value;
+    const city = fCity.value;
+
+    let items = db.slice();
+
+    // Primary search matches city or country (simple)
+    if (q && q.length >= 2){
+      items = items.filter(x =>
+        x.city.toLowerCase().includes(q) ||
+        x.country.toLowerCase().includes(q) ||
+        x.name.toLowerCase().includes(q)
+      );
+    }
+
+    if (c) items = items.filter(x => x.country === c);
+    if (city) items = items.filter(x => x.city === city);
+
+    return items;
+  }
+
+  function renderAppliedFilters(){
+    const chips = [];
+    if (fCountry.value) chips.push(`Country: <b>${escapeHtml(fCountry.value)}</b>`);
+    if (fCity.value) chips.push(`City/Region: <b>${escapeHtml(fCity.value)}</b>`);
+
+    applied.innerHTML = chips.length
+      ? `Filtered by: ${chips.join(' &nbsp;•&nbsp; ')} &nbsp; <a href="#" style="color:var(--accent); font-weight:800; text-decoration:none;" onclick="clearFilters(); return false;">Clear all</a>`
+      : '';
+  }
+
+  function clearFilters(){
+    fCountry.value = '';
+    buildCityOptions(db);
+    fCity.value = '';
+    renderAppliedFilters();
+    runSearch(true);
+  }
+
+  function rebuildCityForCurrent(){
+    const q = (qEl.value || "").trim().toLowerCase();
+    let items = db.slice();
+
+    if (q.length >= 2){
+      items = items.filter(x =>
+        x.city.toLowerCase().includes(q) ||
+        x.country.toLowerCase().includes(q) ||
+        x.name.toLowerCase().includes(q)
+      );
+    }
+    if (fCountry.value) items = items.filter(x => x.country === fCountry.value);
+
+    buildCityOptions(items);
+    fCity.value = '';
+  }
+
+  function renderList(items){
+    qLabel.textContent = `“${qEl.value || ""}”`;
+    listCount.textContent = String(items.length);
+    countLabel.textContent = items.length ? `(${items.length} found)` : `(0 found)`;
+
+    if (!items.length){
+      listBody.innerHTML = `
+        <div class="empty">
+          <b>No centers found</b> for <b>${escapeHtml(qEl.value || "")}</b>.<br/>
+          Try a different spelling, broaden your search, or clear filters.
+          <div style="margin-top:10px;" class="row">
+            <button class="btn primary" type="button" onclick="clearFilters()">Clear filters</button>
+            <button class="btn" type="button" onclick="notify('Open Interactive Map (simulated)')">View on map</button>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    listBody.innerHTML = items.map(x => `
+      <div class="item" data-id="${escapeHtml(x.id)}" role="button" tabindex="0" aria-label="Open ${escapeHtml(x.name)}">
+        <div>
+          <p class="name">${escapeHtml(x.name)}</p>
+          <p class="meta">${escapeHtml(x.city)}, ${escapeHtml(x.country)} • ${escapeHtml(x.zone)}</p>
+        </div>
+        <div class="action">Open</div>
+      </div>
+    `).join("");
+
+    listBody.querySelectorAll('.item').forEach(el => {
+      const go = () => {
+        const id = el.getAttribute('data-id');
+        notify(`Open Center Detail (simulated): ${id}`);
+        // Real build: window.location.href = `/centers/${id}`;
+      };
+      el.addEventListener('click', go);
+      el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+    });
+  }
+
+  // ---- Typeahead suggestions
+  function getSuggestions(q){
+    const qq = q.trim().toLowerCase();
+    if (qq.length < 2) return [];
+
+    const pool = new Map();
+    db.forEach(x => {
+      [x.city, x.country, x.name].forEach(v => {
+        if (v.toLowerCase().includes(qq)) pool.set(v, true);
+      });
+    });
+    return Array.from(pool.keys()).sort().slice(0, 7);
+  }
+
+  function showSuggestions(items){
+    lastSuggest = items;
+    suggestIndex = -1;
+
+    if (!items.length){
+      hideSuggestions();
+      return;
+    }
+
+    suggestEl.innerHTML = items.map((t, i) =>
+      `<button type="button" role="option" data-i="${i}" aria-selected="false">${escapeHtml(t)}</button>`
+    ).join("");
+    suggestEl.classList.add('show');
+
+    suggestEl.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        qEl.value = btn.textContent;
+        hideSuggestions();
+        runSearch(true);
+      });
+    });
+  }
+
+  function hideSuggestions(){
+    suggestEl.classList.remove('show');
+    suggestEl.innerHTML = '';
+    lastSuggest = [];
+    suggestIndex = -1;
+  }
+
+  function moveSuggestion(delta){
+    if (!lastSuggest.length) return;
+
+    suggestIndex = Math.max(0, Math.min(lastSuggest.length - 1, suggestIndex + delta));
+    const buttons = Array.from(suggestEl.querySelectorAll('button'));
+    buttons.forEach((b, idx) => b.setAttribute('aria-selected', idx === suggestIndex ? 'true' : 'false'));
+    buttons[suggestIndex].scrollIntoView({block:'nearest'});
+  }
+
+  // ---- Search runner with states (simulate async)
+  function runSearch(forceRetry=false){
+    const q = (qEl.value || '').trim();
+
+    // Validation (typeahead)
+    if (q.length > 0 && q.length < 2){
+      setValidation('Please type at least 2 characters.');
+      return;
+    }
+    setValidation(null);
+
+    hideSuggestions();
+    setLoading(true);
+
+    setTimeout(() => {
+      // Simulated error toggle (keep false for approval draft)
+      const shouldError = !forceRetry && false;
+      if (shouldError){
+        setLoading(false);
+        renderError();
+        return;
+      }
+
+      rebuildCityForCurrent();
+      const items = filterDB();
+      renderAppliedFilters();
+      renderList(items);
+
+      setLoading(false);
+      notify("Search updated");
+    }, 450);
+  }
+
+  // ---- Events
+  qEl.addEventListener('input', () => {
+    const val = qEl.value || '';
+    if (val.trim().length >= 2){
+      setValidation(null);
+      showSuggestions(getSuggestions(val));
+    } else {
+      hideSuggestions();
+      if (val.trim().length === 1) setValidation('Please type at least 2 characters.');
+      else setValidation(null);
+    }
+  });
+
+  qEl.addEventListener('keydown', (e) => {
+    if (suggestEl.classList.contains('show')){
+      if (e.key === 'ArrowDown'){ e.preventDefault(); moveSuggestion(1); }
+      if (e.key === 'ArrowUp'){ e.preventDefault(); moveSuggestion(-1); }
+      if (e.key === 'Escape'){ hideSuggestions(); }
+      if (e.key === 'Enter'){
+        if (suggestIndex >= 0 && lastSuggest[suggestIndex]){
+          e.preventDefault();
+          qEl.value = lastSuggest[suggestIndex];
+          hideSuggestions();
+          runSearch(true);
+          return;
+        }
+      }
+    }
+    if (e.key === 'Enter') runSearch(true);
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.typeaheadWrap')) hideSuggestions();
+  });
+
+  fCountry.addEventListener('change', () => {
+    rebuildCityForCurrent();
+    renderAppliedFilters();
+    renderList(filterDB());
+  });
+
+  fCity.addEventListener('change', () => {
+    renderAppliedFilters();
+    renderList(filterDB());
+  });
+
+  // Init
+  buildCityOptions(db);
+  renderAppliedFilters();
+  renderList(filterDB());
+  </script>
+</body>
+</html>
