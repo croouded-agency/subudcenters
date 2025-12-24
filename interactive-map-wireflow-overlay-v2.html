@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Interactive World Map — Wireflow for Approval (SubudCenters.com)</title>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --ink:#111827;
+      --muted:#6b7280;
+      --line:#e5e7eb;
+      --soft:#f9fafb;
+      --accent:#2563eb;
+      --ok:#16a34a;
+      --warn:#f59e0b;
+      --radius:14px;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    }
+    *{box-sizing:border-box}
+    body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--font);}
+    .wrap{max-width:1180px; margin:0 auto; padding:22px 16px 44px;}
+    header{display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:14px;}
+    h1{margin:0; font-size:22px;}
+    .sub{color:var(--muted); font-size:13px; line-height:1.45;}
+    .pill{display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:999px; border:1px solid var(--line); background:#fff; font-size:12px; color:var(--muted);}
+    .grid{display:grid; grid-template-columns: 360px 1fr; gap:14px; align-items:start;}
+    @media (max-width: 980px){ .grid{grid-template-columns:1fr;} }
+
+    .card{border:1px solid var(--line); border-radius:16px; background:#fff; overflow:hidden;}
+    .cardHdr{padding:12px 12px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; gap:10px;}
+    .cardHdr b{font-size:13px;}
+    .cardBody{padding:12px;}
+
+    /* Assumptions */
+    ul{margin:10px 0 0; padding-left:18px; color:var(--ink);}
+    li{margin:8px 0; font-size:13px; color:var(--ink);}
+    .note{margin-top:10px; padding:10px 10px; border-radius:12px; background:var(--soft); border:1px solid var(--line); font-size:12px; color:var(--muted);}
+    .tagRow{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px;}
+    .dot{width:10px; height:10px; border-radius:99px; background:var(--warn);}
+    .dot.gray{background:#9ca3af}
+    .dot.ok{background:var(--ok)}
+
+    /* Map canvas */
+    .mapWrap{position:relative; height:560px; background:linear-gradient(135deg,#f3f4f6,#ffffff);}
+    @media (max-width: 980px){ .mapWrap{height:520px;} }
+    .mapInner{position:absolute; inset:12px; border-radius:16px; border:1px dashed #d1d5db; background:
+      repeating-linear-gradient(45deg, #fafafa, #fafafa 10px, #ffffff 10px, #ffffff 20px);
+      overflow:hidden;
+    }
+    .mapLabel{position:absolute; left:18px; top:14px; font-size:13px; color:var(--muted);}
+    .mapLabel b{color:var(--ink);}
+
+    /* Overlay controls */
+    .panel{position:absolute; top:16px; right:16px; width:340px; max-width:calc(100% - 32px);
+      background:rgba(255,255,255,.92);
+      border:1px solid var(--line); border-radius:16px; box-shadow:0 14px 34px rgba(17,24,39,.12);
+      backdrop-filter: blur(6px);
+      overflow:hidden;
+    }
+    .panelHdr{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 10px; border-bottom:1px solid var(--line);}
+    .panelHdr b{font-size:13px;}
+    .panelBody{padding:10px;}
+    .row{display:flex; gap:8px; align-items:center;}
+    .row + .row{margin-top:8px;}
+    select, input[type="search"]{
+      width:100%;
+      padding:10px 10px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      font-size:13px;
+      outline:none;
+      background:#fff;
+    }
+    select:focus, input[type="search"]:focus{border-color:#93c5fd; box-shadow:0 0 0 4px rgba(37,99,235,.08);}
+    .btn{padding:9px 10px; border-radius:12px; border:1px solid var(--line); background:#fff; cursor:pointer; font-weight:800; font-size:12px; white-space:nowrap;}
+    .btn.primary{background:var(--accent); border-color:var(--accent); color:#fff;}
+    .btn.icon{width:34px; display:inline-flex; align-items:center; justify-content:center;}
+    .btn[disabled]{opacity:.6; cursor:not-allowed;}
+    .miniHelp{font-size:12px; color:var(--muted); line-height:1.4; margin-top:6px;}
+    .panelCollapsed{position:absolute; top:16px; right:16px; display:none;}
+    .panelCollapsed .btn{box-shadow:0 14px 34px rgba(17,24,39,.12); background:#fff;}
+
+    /* Zones layer (dummy) */
+    .zones, .pins{position:absolute; inset:0;}
+    .zoneBubble{
+      position:absolute;
+      width:140px; height:140px; border-radius:999px;
+      background:rgba(37,99,235,.10);
+      border:2px dashed rgba(37,99,235,.35);
+      display:flex; align-items:center; justify-content:center;
+      text-align:center;
+      padding:10px;
+      cursor:pointer;
+      user-select:none;
+      transform:translate(-50%,-50%);
+    }
+    .zoneBubble b{font-size:12px; color:var(--ink);}
+    .zoneBubble span{display:block; font-size:11px; color:var(--muted); margin-top:3px;}
+    .zoneBubble.active{background:rgba(22,163,74,.12); border-color:rgba(22,163,74,.45);}
+    .zoneBubble:hover{filter:brightness(0.98);}
+
+
+    .zoneBubble .countries{position:absolute; inset:10px; pointer-events:none;}
+    .countryDot{
+      position:absolute;
+      width:36px; height:36px; border-radius:999px;
+      background:rgba(255,255,255,.92);
+      border:1px solid rgba(37,99,235,.35);
+      display:flex; align-items:center; justify-content:center;
+      font-size:11px; font-weight:900; color:var(--ink);
+      box-shadow:0 10px 20px rgba(17,24,39,.08);
+      pointer-events:auto;
+      cursor:pointer;
+    }
+    .countryDot:hover{filter:brightness(.98); transform:scale(1.02);}
+    .countryDot small{display:block; font-size:10px; font-weight:900;}
+    .countryDot.active{outline:2px solid rgba(22,163,74,.45); border-color:rgba(22,163,74,.45);}
+    /* Floating reset */
+    .floatReset{
+      position:absolute; left:16px; bottom:16px;
+      z-index:35;
+    }
+
+    /* Pins */
+    .pins{display:none;}
+    .pin{
+      position:absolute; width:12px; height:12px; border-radius:999px;
+      border:2px solid #111827;
+      background:#fff;
+      transform:translate(-50%,-50%);
+      cursor:pointer;
+    }
+    .pin::after{
+      content:"";
+      position:absolute; left:50%; top:50%;
+      width:4px; height:4px; border-radius:999px;
+      background:#111827;
+      transform:translate(-50%,-50%);
+    }
+    .pin:hover{transform:translate(-50%,-50%) scale(1.08);}
+    .pin.active{border-color:var(--ok);}
+    .pin.active::after{background:var(--ok);}
+
+    /* Hover preview card */
+    .preview{
+      position:absolute;
+      min-width:260px;
+      max-width:320px;
+      background:#111827;
+      color:#fff;
+      border-radius:14px;
+      padding:10px;
+      box-shadow:0 16px 40px rgba(0,0,0,.25);
+      display:none;
+      z-index:30;
+    }
+    .preview::after{
+      content:"";
+      position:absolute;
+      width:10px; height:10px;
+      background:#111827;
+      transform:rotate(45deg);
+      left:18px; bottom:-5px;
+    }
+    .prevRow{display:flex; gap:10px; align-items:center;}
+    .thumb{width:56px; height:40px; border-radius:10px; background:#e5e7eb; flex:0 0 auto; overflow:hidden;}
+    .thumb img{width:100%; height:100%; object-fit:cover; display:block;}
+    .prevTxt b{display:block; font-size:13px; line-height:1.2; margin-bottom:4px;}
+    .prevTxt div{font-size:12px; color:rgba(255,255,255,.78); line-height:1.25;}
+    .prevMeta{margin-top:8px; font-size:11px; color:rgba(255,255,255,.68);}
+
+    /* Centers list */
+    .list{border-top:1px solid var(--line); background:#fff;}
+    .listHdr{padding:10px 12px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--line);}
+    .listHdr b{font-size:13px;}
+    .item{padding:12px 12px; display:flex; justify-content:space-between; gap:12px; align-items:center; border-bottom:1px solid #f3f4f6; cursor:pointer;}
+    .item:hover{background:var(--soft);}
+    .item .name{font-weight:900; font-size:13px; margin:0 0 4px;}
+    .item .meta{margin:0; font-size:12px; color:var(--muted);}
+    .item .open{color:var(--accent); font-weight:900; font-size:12px;}
+    .item.active{outline:2px solid rgba(22,163,74,.35); background:rgba(22,163,74,.06);}
+    .empty{padding:12px; color:var(--muted); font-size:13px; line-height:1.5;}
+    .toast{position:fixed; left:50%; bottom:16px; transform:translateX(-50%); border:1px solid var(--line); background:#fff;
+      padding:10px 12px; border-radius:999px; box-shadow:0 10px 28px rgba(17,24,39,.12);
+      opacity:0; pointer-events:none; transition:opacity .18s ease; max-width:92vw; font-size:13px;
+    }
+    .toast.show{opacity:1;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Interactive World Map — Wireflow for Approval (SubudCenters.com)</h1>
+        <div class="sub">Purpose: confirm shared understanding of the interactive map flow (Zone → Country → City/Region → Center page). Wireflow-only; not visual design.</div>
+      </div>
+      <div class="pill">Wireflow-only · Not visual design</div>
+    </header>
+
+    <div class="grid">
+      <!-- LEFT: Assumptions -->
+      <section class="card" aria-label="Assumptions to confirm">
+        <div class="cardHdr">
+          <b>1) Assumptions to Confirm</b>
+          <span class="sub">Please reply: Confirm / Changes needed</span>
+        </div>
+        <div class="cardBody">
+          <ul>
+            <li><b>Single “World Map”</b> experience (one page; not separate pages per zone/country/city).</li>
+            <li>Map starts at <b>full world view</b> with standard zoom/pan (map library handles zoom UI).</li>
+            <li>Filter order: <b>Zone → Country → City/Region</b>.</li>
+            <li>Selecting a <b>Zone</b> filters available countries (via map click or dropdown).</li>
+            <li>Selecting a <b>Country</b> shows <b>clickable pins/dots</b> for centers in that country and filters City/Region.</li>
+            <li>Selecting a <b>City/Region</b> shows a list of Subud centers in that location.</li>
+            <li>Clicking a <b>pin</b> or a <b>center in the list</b> opens the individual center page.</li>
+            <li>Pins are <b>auto-generated</b> from the approved center database using stored latitude/longitude.</li>
+            <li><b>No manual pin entry</b> on the map itself.</li>
+            <li>“City/Region” uses existing database values (no administrative boundary polygons).</li>
+            <li><b>No zone/country shape highlighting is required</b> for this approval; dummy Zone bubbles demonstrate “click a Zone”.</li>
+          </ul>
+
+          <div class="tagRow">
+            <span class="pill"><span class="dot"></span> Approval focus</span>
+            <span class="pill"><span class="dot gray"></span> No final UI</span>
+            <span class="pill"><span class="dot ok"></span> Flow validated</span>
+          </div>
+
+          <div class="note">
+            Note: This wireflow demonstrates <b>behavior</b> and interaction. Visual styling will be refined later to match the new SubudCenters.com direction.
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: Map + overlay controls + list -->
+      <section class="card" aria-label="Map and results">
+        <div class="cardHdr">
+          <b>2) World Map (Interactive Wireflow)</b>
+          <span class="sub" id="stateLine">State: Choose a Zone</span>
+        </div>
+        <div class="sub" style="padding:10px 12px; border-bottom:1px solid var(--line);">[World Map Placeholder] · Zoom/pan handled by real map library in build.</div>
+
+
+        <div class="mapWrap" id="mapWrap">
+          <div class="mapInner" aria-label="World Map placeholder">
+<!-- Dummy Zones (clickable) -->
+            <div class="zones" id="zonesLayer" aria-label="Zone selection hotspots">
+              <div class="zoneBubble" data-zone="Zone 1 & 2" style="left:78%; top:58%;">
+                <div><b>Zone 1 & 2</b><span>Asia + Oceania</span></div>
+              <div class="countries">
+              <div class="countryDot" data-country="Australia" style="left:10px; top:10px;"><small>AU</small></div>
+              <div class="countryDot" data-country="Indonesia" style="left:70px; top:10px;"><small>ID</small></div>
+              </div>
+              </div>
+              <div class="zoneBubble" data-zone="Zone 3" style="left:53%; top:35%;">
+                <div><b>Zone 3</b><span>Europe</span></div>
+              <div class="countries">
+              <div class="countryDot" data-country="United Kingdom" style="left:10px; top:10px;"><small>UK</small></div>
+              <div class="countryDot" data-country="Netherlands" style="left:70px; top:10px;"><small>NL</small></div>
+              </div>
+              </div>
+              <div class="zoneBubble" data-zone="Zone 5" style="left:18%; top:46%;">
+                <div><b>Zone 5</b><span>North America</span></div>
+              <div class="countries">
+              <div class="countryDot" data-country="United States" style="left:10px; top:10px;"><small>US</small></div>
+              </div>
+              </div>
+              <div class="zoneBubble" data-zone="Zone 8" style="left:56%; top:72%;">
+                <div><b>Zone 8</b><span>Africa</span></div>
+              <div class="countries">
+              <div class="countryDot" data-country="South Africa" style="left:10px; top:10px;"><small>ZA</small></div>
+              </div>
+              </div>
+            </div>
+
+            <!-- Pins -->
+            <div class="pins" id="pinsLayer" aria-label="Center pins">
+              <!-- positions are illustrative only -->
+              <span class="pin" style="left:82%; top:62%;" data-id="AU-SYD-01" aria-label="Pin: Subud Sydney Center" tabindex="0"></span>
+              <span class="pin" style="left:76%; top:52%;" data-id="ID-JKT-01" aria-label="Pin: Subud Jakarta Center" tabindex="0"></span>
+              <span class="pin" style="left:75%; top:56%;" data-id="ID-BDG-01" aria-label="Pin: Subud Bandung Center" tabindex="0"></span>
+              <span class="pin" style="left:54%; top:34%;" data-id="GB-LON-01" aria-label="Pin: Subud London Center" tabindex="0"></span>
+              <span class="pin" style="left:55%; top:38%;" data-id="NL-AMS-01" aria-label="Pin: Subud Amsterdam Center" tabindex="0"></span>
+              <span class="pin" style="left:18%; top:46%;" data-id="US-NYC-01" aria-label="Pin: Subud New York Center" tabindex="0"></span>
+              <span class="pin" style="left:14%; top:56%;" data-id="US-SF-01" aria-label="Pin: Subud San Francisco Center" tabindex="0"></span>
+              <span class="pin" style="left:56%; top:72%;" data-id="ZA-JHB-01" aria-label="Pin: Subud Johannesburg Center" tabindex="0"></span>
+            </div>
+
+            <!-- Hover preview -->
+            <div class="preview" id="preview" role="dialog" aria-hidden="true"></div>
+
+            <!-- Overlay Explore/Refine Panel -->
+            <div class="panel" id="panel">
+              <div class="panelHdr">
+                <b>Explore / Refine</b>
+                <div class="row" style="gap:6px;">
+                  <button class="btn icon" id="btnHide" type="button" title="Hide panel">⟫</button>
+                </div>
+              </div>
+              <div class="panelBody">
+                <div class="row">
+                  <select id="zoneSelect" aria-label="Zone">
+                    <option value="">Step 1 — Zone</option>
+                    <option>Zone 1 & 2</option>
+                    <option>Zone 3</option>
+                    <option>Zone 5</option>
+                    <option>Zone 8</option>
+                  </select>
+                </div>
+                <div class="row">
+                  <select id="countrySelect" aria-label="Country" disabled>
+                    <option value="">Step 2 — Country (shows pins)</option>
+                  </select>
+                </div>
+                <div class="row">
+                  <select id="citySelect" aria-label="City/Region" disabled>
+                    <option value="">Step 3 — City/Region (shows list)</option>
+                  </select>
+                </div>
+
+                <div class="row">
+                  <button class="btn" id="resetBtn" type="button">Reset all</button>
+                  <button class="btn primary" id="openBtn" type="button" disabled>Open selected</button>
+                </div>
+
+                <div class="miniHelp" id="help">
+                  Start by selecting a <b>Zone</b> (click a Zone bubble or use dropdown). Then choose a <b>Country</b> to show pins.
+                </div>
+              </div>
+            </div>
+
+            <!-- Collapsed button -->
+            <div class="panelCollapsed" id="panelCollapsed">
+              <button class="btn" id="btnShow" type="button">Show controls</button>
+            </div>
+
+            <div class="floatReset">
+              <button class="btn" id="btnFloatReset" type="button" title="Reset search">↺ Reset</button>
+            </div>
+          </div>
+
+          <!-- List under map -->
+          <div class="list" aria-label="Centers list">
+            <div class="listHdr">
+              <b>Centers List</b>
+              <span class="sub" id="count">0</span>
+            </div>
+            <div id="listBody"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const toast = document.getElementById('toast');
+    function notify(msg){
+      toast.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(notify._t);
+      notify._t = setTimeout(()=>toast.classList.remove('show'), 1400);
+    }
+
+    // Dummy data (wireflow)
+    const centers = [
+      {id:"AU-SYD-01", name:"Subud Sydney Center", address:"Sydney, Australia", zone:"Zone 1 & 2", country:"Australia", city:"Sydney", thumb:"data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2756%27%20height%3D%2740%27%3E%0A%3Crect%20width%3D%2756%27%20height%3D%2740%27%20rx%3D%276%27%20fill%3D%27%23e5e7eb%27/%3E%0A%3Cpath%20d%3D%27M8%2030l10-10%208%208%208-12%2014%2014%27%20fill%3D%27none%27%20stroke%3D%27%239ca3af%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27/%3E%0A%3Ccircle%20cx%3D%2718%27%20cy%3D%2716%27%20r%3D%273%27%20fill%3D%27%239ca3af%27/%3E%0A%3C/svg%3E"},
+      {id:"ID-JKT-01", name:"Subud Jakarta Center", address:"Jakarta, Indonesia", zone:"Zone 1 & 2", country:"Indonesia", city:"Jakarta", thumb:"data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2756%27%20height%3D%2740%27%3E%0A%3Crect%20width%3D%2756%27%20height%3D%2740%27%20rx%3D%276%27%20fill%3D%27%23e5e7eb%27/%3E%0A%3Cpath%20d%3D%27M8%2030l10-10%208%208%208-12%2014%2014%27%20fill%3D%27none%27%20stroke%3D%27%239ca3af%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27/%3E%0A%3Ccircle%20cx%3D%2718%27%20cy%3D%2716%27%20r%3D%273%27%20fill%3D%27%239ca3af%27/%3E%0A%3C/svg%3E"},
+      {id:"ID-BDG-01", name:"Subud Bandung Center", address:"Bandung, Indonesia", zone:"Zone 1 & 2", country:"Indonesia", city:"Bandung", thumb:"data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2756%27%20height%3D%2740%27%3E%0A%3Crect%20width%3D%2756%27%20height%3D%2740%27%20rx%3D%276%27%20fill%3D%27%23e5e7eb%27/%3E%0A%3Cpath%20d%3D%27M8%2030l10-10%208%208%208-12%2014%2014%27%20fill%3D%27none%27%20stroke%3D%27%239ca3af%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27/%3E%0A%3Ccircle%20cx%3D%2718%27%20cy%3D%2716%27%20r%3D%273%27%20fill%3D%27%239ca3af%27/%3E%0A%3C/svg%3E"},
+      {id:"GB-LON-01", name:"Subud London Center", address:"London, United Kingdom", zone:"Zone 3", country:"United Kingdom", city:"London", thumb:"data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2756%27%20height%3D%2740%27%3E%0A%3Crect%20width%3D%2756%27%20height%3D%2740%27%20rx%3D%276%27%20fill%3D%27%23e5e7eb%27/%3E%0A%3Cpath%20d%3D%27M8%2030l10-10%208%208%208-12%2014%2014%27%20fill%3D%27none%27%20stroke%3D%27%239ca3af%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27/%3E%0A%3Ccircle%20cx%3D%2718%27%20cy%3D%2716%27%20r%3D%273%27%20fill%3D%27%239ca3af%27/%3E%0A%3C/svg%3E"},
+      {id:"NL-AMS-01", name:"Subud Amsterdam Center", address:"Amsterdam, Netherlands", zone:"Zone 3", country:"Netherlands", city:"Amsterdam", thumb:"data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2756%27%20height%3D%2740%27%3E%0A%3Crect%20width%3D%2756%27%20height%3D%2740%27%20rx%3D%276%27%20fill%3D%27%23e5e7eb%27/%3E%0A%3Cpath%20d%3D%27M8%2030l10-10%208%208%208-12%2014%2014%27%20fill%3D%27none%27%20stroke%3D%27%239ca3af%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27/%3E%0A%3Ccircle%20cx%3D%2718%27%20cy%3D%2716%27%20r%3D%273%27%20fill%3D%27%239ca3af%27/%3E%0A%3C/svg%3E"},
+      {id:"US-NYC-01", name:"Subud New York Center", address:"New York, United States", zone:"Zone 5", country:"United States", city:"New York", thumb:"data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2756%27%20height%3D%2740%27%3E%0A%3Crect%20width%3D%2756%27%20height%3D%2740%27%20rx%3D%276%27%20fill%3D%27%23e5e7eb%27/%3E%0A%3Cpath%20d%3D%27M8%2030l10-10%208%208%208-12%2014%2014%27%20fill%3D%27none%27%20stroke%3D%27%239ca3af%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27/%3E%0A%3Ccircle%20cx%3D%2718%27%20cy%3D%2716%27%20r%3D%273%27%20fill%3D%27%239ca3af%27/%3E%0A%3C/svg%3E"},
+      {id:"US-SF-01", name:"Subud San Francisco Center", address:"San Francisco, United States", zone:"Zone 5", country:"United States", city:"San Francisco", thumb:"data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2756%27%20height%3D%2740%27%3E%0A%3Crect%20width%3D%2756%27%20height%3D%2740%27%20rx%3D%276%27%20fill%3D%27%23e5e7eb%27/%3E%0A%3Cpath%20d%3D%27M8%2030l10-10%208%208%208-12%2014%2014%27%20fill%3D%27none%27%20stroke%3D%27%239ca3af%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27/%3E%0A%3Ccircle%20cx%3D%2718%27%20cy%3D%2716%27%20r%3D%273%27%20fill%3D%27%239ca3af%27/%3E%0A%3C/svg%3E"},
+      {id:"ZA-JHB-01", name:"Subud Johannesburg Center", address:"Johannesburg, South Africa", zone:"Zone 8", country:"South Africa", city:"Johannesburg", thumb:"data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2756%27%20height%3D%2740%27%3E%0A%3Crect%20width%3D%2756%27%20height%3D%2740%27%20rx%3D%276%27%20fill%3D%27%23e5e7eb%27/%3E%0A%3Cpath%20d%3D%27M8%2030l10-10%208%208%208-12%2014%2014%27%20fill%3D%27none%27%20stroke%3D%27%239ca3af%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27/%3E%0A%3Ccircle%20cx%3D%2718%27%20cy%3D%2716%27%20r%3D%273%27%20fill%3D%27%239ca3af%27/%3E%0A%3C/svg%3E"}
+    ];
+
+    const zoneToCountries = {
+      "Zone 1 & 2": ["Australia","Indonesia"],
+      "Zone 3": ["United Kingdom","Netherlands"],
+      "Zone 5": ["United States"],
+      "Zone 8": ["South Africa"]
+    };
+
+    // Elements
+    const stateLine = document.getElementById('stateLine');
+    const zonesLayer = document.getElementById('zonesLayer');
+    const pinsLayer = document.getElementById('pinsLayer');
+    const preview = document.getElementById('preview');
+
+    const zoneSelect = document.getElementById('zoneSelect');
+    const countrySelect = document.getElementById('countrySelect');
+    const citySelect = document.getElementById('citySelect');
+
+    const listBody = document.getElementById('listBody');
+    const count = document.getElementById('count');
+    const help = document.getElementById('help');
+    const openBtn = document.getElementById('openBtn');
+
+    const panel = document.getElementById('panel');
+    const panelCollapsed = document.getElementById('panelCollapsed');
+    const btnHide = document.getElementById('btnHide');
+    const btnShow = document.getElementById('btnShow');
+    const resetBtn = document.getElementById('resetBtn');
+    const btnFloatReset = document.getElementById('btnFloatReset');
+
+    let state = {
+      zone:"",
+      country:"",
+      city:"",
+      selectedCenter:""
+    };
+
+    function esc(s){ return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
+
+    function setStateLine(){
+      if (!state.zone) {
+        stateLine.textContent = "State: Choose a Zone";
+        help.innerHTML = 'Start by selecting a <b>Zone</b> (click a Zone bubble or use dropdown). Then choose a <b>Country</b> to show pins.';
+        return;
+      }
+      if (state.zone && !state.country) {
+        stateLine.textContent = `State: ${state.zone} selected → Choose a Country`;
+        help.innerHTML = `Zone selected: <b>${esc(state.zone)}</b>. Now choose a <b>Country</b> to show pins/dots for centers.`;
+        return;
+      }
+      if (state.country && !state.city) {
+        stateLine.textContent = `State: ${state.country} selected → Optionally choose a City/Region`;
+        help.innerHTML = `Showing pins for <b>${esc(state.country)}</b>. Optionally select <b>City/Region</b> to narrow the list. Hover a pin for preview; click to open details.`;
+        return;
+      }
+      stateLine.textContent = `State: ${state.city} selected → Choose a Center`;
+      help.innerHTML = `Filtered to <b>${esc(state.city)}</b>. Hover pins for preview. Click a pin or a center in the list to open the center page.`;
+    }
+
+    function buildOptions(selectEl, placeholder, values){
+      selectEl.innerHTML = `<option value="">${placeholder}</option>` + values.map(v=>`<option>${esc(v)}</option>`).join("");
+    }
+
+    function updateDependentControls(){
+      countrySelect.disabled = !state.zone;
+      citySelect.disabled = !state.country;
+
+      if (!state.zone) {
+        buildOptions(countrySelect, "Step 2 — Country (shows pins)", []);
+        buildOptions(citySelect, "Step 3 — City/Region (shows list)", []);
+        return;
+      }
+
+      const countries = zoneToCountries[state.zone] || [];
+      buildOptions(countrySelect, "Step 2 — Country (shows pins)", countries);
+
+      if (state.country && !countries.includes(state.country)) {
+        state.country = "";
+        state.city = "";
+      }
+      countrySelect.value = state.country;
+
+      if (!state.country) {
+        buildOptions(citySelect, "Step 3 — City/Region (shows list)", []);
+        citySelect.value = "";
+        return;
+      }
+
+      const cities = Array.from(new Set(centers.filter(c => c.zone===state.zone && c.country===state.country).map(c=>c.city))).sort();
+      buildOptions(citySelect, "Step 3 — City/Region (shows list)", cities);
+
+      if (state.city && !cities.includes(state.city)) state.city = "";
+      citySelect.value = state.city;
+    }
+
+    function showPins(){
+      pinsLayer.style.display = state.country ? "block" : "none";
+
+      const pins = Array.from(pinsLayer.querySelectorAll('.pin'));
+      pins.forEach(p => {
+        const id = p.dataset.id;
+        const c = centers.find(x=>x.id===id);
+        const visible = !!(c && c.country===state.country && c.zone===state.zone && (!state.city || c.city===state.city));
+        p.style.display = visible ? "block" : "none";
+      });
+    }
+
+    function highlightZoneBubbles(){
+      zonesLayer.querySelectorAll('.zoneBubble').forEach(z => {
+        z.classList.toggle('active', z.dataset.zone === state.zone);
+      });
+    }
+
+    function renderList(){
+      let items = centers.slice();
+      if (state.zone) items = items.filter(x=>x.zone===state.zone);
+      if (state.country) items = items.filter(x=>x.country===state.country);
+      if (state.city) items = items.filter(x=>x.city===state.city);
+
+      count.textContent = String(items.length);
+
+      if (!state.country) {
+        listBody.innerHTML = `<div class="empty">Select a <b>Country</b> to show pins and list centers.</div>`;
+        return;
+      }
+
+      if (!items.length) {
+        listBody.innerHTML = `<div class="empty">No centers found for the selected filters.</div>`;
+        return;
+      }
+
+      listBody.innerHTML = items.map(x => `
+        <div class="item ${x.id===state.selectedCenter?'active':''}" data-id="${esc(x.id)}">
+          <div>
+            <p class="name">${esc(x.name)}</p>
+            <p class="meta">${esc(x.zone)} • ${esc(x.country)} • ${esc(x.city)}</p>
+          </div>
+          <div class="open">Open</div>
+        </div>
+      `).join("");
+
+      listBody.querySelectorAll('.item').forEach(el => {
+        el.addEventListener('click', () => {
+          const id = el.dataset.id;
+          selectCenter(id);
+          openCenter(id);
+        });
+      });
+    
+    // Country dots inside Zone bubbles (map-only drilldown)
+    zonesLayer.querySelectorAll('.countryDot').forEach(dot => {
+      dot.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const bubble = dot.closest('.zoneBubble');
+        const z = bubble ? bubble.dataset.zone : "";
+        const ctry = dot.dataset.country || "";
+        if (!z || !ctry) return;
+
+        state.zone = z;
+        state.country = ctry;
+        state.city = "";
+        state.selectedCenter = "";
+        zoneSelect.value = z;
+        notify(`Country selected: ${ctry}`);
+        hidePreview();
+        applyAll();
+
+        // mark active dot
+        zonesLayer.querySelectorAll('.countryDot').forEach(d => d.classList.toggle('active', d === dot));
+      });
+    });
+
+}
+
+    function selectCenter(id){
+      state.selectedCenter = id;
+      pinsLayer.querySelectorAll('.pin').forEach(p => p.classList.toggle('active', p.dataset.id===id));
+      listBody.querySelectorAll('.item').forEach(i => i.classList.toggle('active', i.dataset.id===id));
+      openBtn.disabled = !state.selectedCenter;
+    }
+
+    function openCenter(id){
+      const c = centers.find(x=>x.id===id);
+      if (!c) return;
+      notify(`Open Center Detail (simulated): ${c.id}`);
+    }
+
+    function showPreviewForPin(pinEl){
+      const id = pinEl.dataset.id;
+      const c = centers.find(x=>x.id===id);
+      if (!c) return;
+
+      preview.innerHTML = `
+        <div class="prevRow">
+          <div class="thumb"><img src="${c.thumb}" alt="" /></div>
+          <div class="prevTxt">
+            <b>${esc(c.name)}</b>
+            <div>${esc(c.address)}</div>
+          </div>
+        </div>
+        <div class="prevMeta">Click to open center details</div>
+      `;
+
+      const mapInner = document.querySelector('.mapInner');
+      const rPin = pinEl.getBoundingClientRect();
+      const rMap = mapInner.getBoundingClientRect();
+
+      let left = (rPin.left - rMap.left) - 10;
+      let top = (rPin.top - rMap.top) - 92;
+
+      left = Math.max(10, Math.min(left, rMap.width - 330));
+      top = Math.max(10, top);
+
+      preview.style.left = left + "px";
+      preview.style.top = top + "px";
+      preview.style.display = "block";
+      preview.setAttribute("aria-hidden","false");
+    }
+
+    function hidePreview(){
+      preview.style.display = "none";
+      preview.setAttribute("aria-hidden","true");
+    }
+
+    function applyAll(){
+      highlightZoneBubbles();
+      updateDependentControls();
+      setStateLine();
+      showPins();
+      renderList();
+      openBtn.disabled = !state.selectedCenter;
+    }
+
+    zonesLayer.querySelectorAll('.zoneBubble').forEach(b => {
+      b.addEventListener('click', () => {
+        const z = b.dataset.zone;
+        state.zone = z;
+        state.country = "";
+        state.city = "";
+        state.selectedCenter = "";
+        zoneSelect.value = z;
+        notify(`Zone selected: ${z}`);
+        // clear active country dots
+        zonesLayer.querySelectorAll('.countryDot').forEach(d => d.classList.remove('active'));
+        hidePreview();
+        applyAll();
+      });
+    });
+
+    zoneSelect.addEventListener('change', () => {
+      state.zone = zoneSelect.value;
+      state.country = "";
+      state.city = "";
+      state.selectedCenter = "";
+      notify(state.zone ? `Zone selected: ${state.zone}` : "Zone cleared");
+      // clear active country dots
+      zonesLayer.querySelectorAll('.countryDot').forEach(d => d.classList.remove('active'));
+      hidePreview();
+      applyAll();
+    });
+
+    countrySelect.addEventListener('change', () => {
+      state.country = countrySelect.value;
+      state.city = "";
+      state.selectedCenter = "";
+      notify(state.country ? `Country selected: ${state.country}` : "Country cleared");
+      // sync active country dot
+      zonesLayer.querySelectorAll('.countryDot').forEach(d => d.classList.toggle('active', d.dataset.country===state.country));
+      hidePreview();
+      applyAll();
+    });
+
+    citySelect.addEventListener('change', () => {
+      state.city = citySelect.value;
+      state.selectedCenter = "";
+      notify(state.city ? `City/Region selected: ${state.city}` : "City/Region cleared");
+      hidePreview();
+      applyAll();
+    });
+
+    pinsLayer.querySelectorAll('.pin').forEach(p => {
+      p.addEventListener('mouseenter', () => showPreviewForPin(p));
+      p.addEventListener('mouseleave', hidePreview);
+      p.addEventListener('focus', () => showPreviewForPin(p));
+      p.addEventListener('blur', hidePreview);
+
+      p.addEventListener('click', () => {
+        const id = p.dataset.id;
+        selectCenter(id);
+        openCenter(id);
+      });
+
+      p.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          const id = p.dataset.id;
+          selectCenter(id);
+          openCenter(id);
+        }
+      });
+    });
+
+    openBtn.addEventListener('click', () => {
+      if (state.selectedCenter) openCenter(state.selectedCenter);
+    });
+
+    resetBtn.addEventListener('click', () => {
+      state = {zone:"", country:"", city:"", selectedCenter:""};
+      zoneSelect.value = "";
+      notify("Reset all");
+      hidePreview();
+      // clear active country dots
+      zonesLayer.querySelectorAll('.countryDot').forEach(d => d.classList.remove('active'));
+      applyAll();
+    });
+
+    btnFloatReset.addEventListener('click', () => {
+      state = {zone:"", country:"", city:"", selectedCenter:""};
+      zoneSelect.value = "";
+      notify("Reset all");
+      hidePreview();
+      // clear active country dots
+      zonesLayer.querySelectorAll('.countryDot').forEach(d => d.classList.remove('active'));
+      applyAll();
+    });
+
+
+    btnHide.addEventListener('click', () => {
+      panel.style.display = "none";
+      panelCollapsed.style.display = "block";
+    });
+    btnShow.addEventListener('click', () => {
+      panel.style.display = "block";
+      panelCollapsed.style.display = "none";
+    });
+
+    applyAll();
+  </script>
+</body>
+</html>
