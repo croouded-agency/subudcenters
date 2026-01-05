@@ -1,175 +1,205 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SubudCenters — Home Wireflow (Revised)</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>SubudCenters.com — Home (Wireflow + Real Map Demo)</title>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+
   <style>
     :root{
       --bg:#ffffff;
       --ink:#111827;
       --muted:#6b7280;
-      --line:#d1d5db;
+      --line:#e5e7eb;
       --soft:#f9fafb;
       --accent:#2563eb;
-      --radius:14px;
-      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      --ok:#16a34a;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
     }
     *{box-sizing:border-box}
-    body{margin:0; font-family:var(--font); background:var(--bg); color:var(--ink);}
-    .wrap{max-width:900px; margin:0 auto; padding:24px 16px 64px;}
+    body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--font);}
+    .wrap{max-width:1200px; margin:0 auto; padding:18px 16px 42px;}
+    header{display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--line); padding-bottom:12px;}
+    .brand{font-weight:950;}
+    .pill{display:inline-flex; align-items:center; padding:7px 10px; border-radius:999px; border:1px solid var(--line); background:#fff; font-size:12px; color:var(--muted);}
+    .hdrRight{display:flex; gap:10px; align-items:center;}
+    h1{margin:18px 0 6px; font-size:28px;}
+    .sub{color:var(--muted); font-size:14px; line-height:1.45;}
 
-    header{
-      display:flex; justify-content:space-between; align-items:center;
-      border-bottom:1px solid var(--line);
-      padding-bottom:14px;
-    }
-    header b{font-size:16px;}
-    header span{font-size:12px; color:var(--muted);}
+    .layout{margin-top:16px; display:grid; grid-template-columns: 400px 1fr; gap:12px; align-items:start;}
+    @media (max-width: 980px){ .layout{grid-template-columns:1fr;} }
 
-    h1{
-      font-size:26px;
-      margin:28px 0 8px;
-      letter-spacing:-.3px;
-    }
-    .subtitle{
-      font-size:14px;
-      color:var(--muted);
-      max-width:620px;
-      line-height:1.6;
-    }
+    .panel{border:1px solid var(--line); border-radius:16px; background:#fff; overflow:hidden;}
+    .panelHdr{padding:12px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center;}
+    .panelHdr b{font-size:13px;}
+    .panelBody{padding:12px;}
+    .count{color:var(--muted); font-size:12px;}
 
-    .card{
-      border:1px dashed var(--line);
-      border-radius:var(--radius);
-      padding:14px;
-      margin-top:18px;
-      background:#fff;
-    }
-    .label{
-      font-size:12px;
-      color:var(--muted);
-      margin-bottom:8px;
-    }
-
-    .row{display:flex; gap:10px; flex-wrap:wrap;}
-    .row > *{flex:1;}
-
-    input{
-      padding:12px;
-      border-radius:12px;
-      border:1px solid var(--line);
-      font-size:14px;
+    .typeaheadWrap{position:relative;}
+    input[type="search"]{
       width:100%;
+      padding:12px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      font-size:14px;
       outline:none;
       background:#fff;
-      color:var(--ink);
+    }
+    input[type="search"]:focus{border-color:#93c5fd; box-shadow:0 0 0 4px rgba(37,99,235,.08);}
+
+    .row{display:flex; gap:10px; align-items:center; margin-top:10px;}
+    .btn{padding:12px; border-radius:12px; border:1px solid var(--line); background:#fff; cursor:pointer; font-weight:900; font-size:14px; white-space:nowrap;}
+    .btn.primary{background:var(--accent); border-color:var(--accent); color:#fff;}
+
+    .help{margin-top:8px; font-size:12px; color:var(--muted); line-height:1.35;}
+    .help.error{color:#b91c1c;}
+    .fieldError{border-color:#ef4444 !important;}
+
+    .suggest{
+      position:absolute; left:0; right:0; top:calc(100% + 6px);
+      border:1px solid var(--line); border-radius:12px; background:#fff; overflow:hidden;
+      box-shadow:0 10px 24px rgba(17,24,39,.08); z-index:20; display:none;
+      max-height:260px; overflow:auto;
+    }
+    .suggest.show{display:block;}
+    .suggest button{
+      width:100%; padding:10px 12px; text-align:left; background:#fff; border:0;
+      border-top:1px solid #f3f4f6; cursor:pointer; font-size:13px;
+    }
+    .suggest button:first-child{border-top:0;}
+    .suggest button:hover, .suggest button[aria-selected="true"]{background:var(--soft);}
+
+    .resultsMeta{display:flex; justify-content:space-between; align-items:center; margin-top:12px;}
+    .list{margin-top:10px; border-top:1px solid var(--line);}
+    .item{
+      padding:12px 10px; border-bottom:1px solid #f3f4f6; cursor:pointer;
+      display:flex; justify-content:space-between; gap:10px; align-items:center;
+    }
+    .item:hover{background:var(--soft);}
+    .item .name{font-weight:950; margin:0 0 4px; font-size:13px;}
+    .item .meta{margin:0; color:var(--muted); font-size:12px;}
+    .item .open{color:var(--accent); font-weight:950; font-size:12px;}
+    .item.active{outline:2px solid rgba(22,163,74,.35); background:rgba(22,163,74,.06);}
+
+    .empty{
+      padding:12px; background:var(--soft); border:1px solid var(--line); border-radius:12px;
+      color:var(--muted); font-size:13px; line-height:1.5; margin-top:10px;
     }
 
-    .btn{
-      padding:12px;
-      border-radius:12px;
-      border:1px solid var(--line);
-      background:#fff;
-      font-weight:900;
-      cursor:pointer;
-      font-size:14px;
-      width:100%;
-      text-align:center;
+    .mapWrap{
+      position:relative; height:640px; border-radius:16px; border:1px solid var(--line);
+      overflow:hidden; background:#fff;
     }
-    .btn.primary{
-      background:rgba(37,99,235,.08);
-      color:var(--accent);
-      border-color:rgba(37,99,235,.35);
-    }
-    .btn:active{transform:translateY(1px);}
+    @media (max-width: 980px){ .mapWrap{height:520px;} }
 
-    .about{
-      margin-top:28px;
-      border-top:1px solid var(--line);
-      padding-top:18px;
+    .mapTopbar{
+      position:absolute; left:12px; right:12px; top:12px;
+      display:flex; justify-content:space-between; align-items:center; gap:10px; z-index:500;
+      pointer-events:none; /* supaya map tetap bisa drag */
     }
-    .about b{font-size:15px;}
-    .about p{
-      font-size:13px;
-      color:var(--muted);
-      max-width:680px;
-      line-height:1.6;
-      margin:10px 0 0;
+    .mapBadge{
+      background:rgba(255,255,255,.92); border:1px solid var(--line); border-radius:999px;
+      padding:8px 10px; font-size:12px; color:var(--muted); backdrop-filter: blur(6px);
+      pointer-events:auto;
     }
+    .mapTools{display:flex; gap:8px; pointer-events:auto;}
+    .btn.icon{width:40px; height:38px; display:inline-flex; align-items:center; justify-content:center; padding:0;}
+
+    /* Leaflet map container */
+    #map{ position:absolute; inset:0; }
+
+    .legend{
+      position:absolute; left:12px; bottom:12px;
+      background:rgba(255,255,255,.92); border:1px solid var(--line); border-radius:14px;
+      padding:10px; font-size:12px; color:var(--muted); backdrop-filter: blur(6px);
+      z-index:500; width:250px;
+    }
+    .legend b{color:var(--ink);}
+    .legend .row2{display:flex; justify-content:space-between; gap:10px; margin-top:6px;}
+    .swatch{width:14px; height:14px; border-radius:4px; border:1px solid rgba(17,24,39,.12);}
+    .z1{background:#2aa9a1;}
+    .z7{background:#8b63b6;}
+    .z3{background:#5aa85b;}
+    .z8{background:#2f5bd6;}
 
     footer{
-      margin-top:36px;
-      border-top:1px solid var(--line);
-      padding-top:14px;
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      flex-wrap:wrap;
-      font-size:12px;
-      color:var(--muted);
-    }
-
-    /* Toast */
-    .toast{
-      position:fixed;
-      left:50%;
-      bottom:16px;
-      transform:translateX(-50%);
-      border:1px solid var(--line);
-      background:#111827;
-      color:#fff;
-      padding:10px 12px;
-      border-radius:999px;
-      font-size:12px;
-      opacity:0;
-      pointer-events:none;
-      transition:opacity .15s ease;
-      max-width:92vw;
-    }
-    .toast.show{opacity:1;}
-
-    @media print{
-      .btn{display:none !important;}
-      body{color:#000;}
+      border-top:1px solid var(--line); margin-top:18px; padding-top:12px;
+      display:flex; justify-content:space-between; align-items:center; color:var(--muted); font-size:13px;
     }
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <b>SubudCenters.com</b>
-      <span>Home — Wireflow (Approval Draft)</span>
+      <div class="brand">SubudCenters.com</div>
+      <div class="hdrRight">
+        <div class="pill">Home — Wireflow + Real Map Demo</div>
+        <div class="pill">Language ▾</div>
+      </div>
     </header>
 
-    <h1>Find a Subud Center Near You</h1>
-    <p class="subtitle">
-      This directory helps you find Subud centers around the world. Search by location or explore using the interactive map.
-    </p>
+    <h1>Find a Subud Center</h1>
+    <div class="sub">Search by country, state/region, city, or center name — or explore the map by panning and zooming.</div>
 
-    <!-- PRIMARY ACTIONS ONLY -->
-    <div class="card">
-      <div class="label">Primary action</div>
+    <div class="layout">
+      <!-- LEFT -->
+      <section class="panel">
+        <div class="panelHdr">
+          <b>Search</b>
+          <span class="count" id="countLabel">0 found</span>
+        </div>
+        <div class="panelBody">
+          <div class="typeaheadWrap">
+            <input id="q" type="search" placeholder="Enter a country, city, region, or center name" autocomplete="off"/>
+            <div id="suggest" class="suggest" role="listbox" aria-label="Suggestions"></div>
+          </div>
 
-      <div class="row">
-        <input id="q" type="search" placeholder="Search by city or country" aria-label="Search by city or country">
-        <button class="btn primary" type="button" onclick="notify('Search results page (simulated)')">Search</button>
-      </div>
+          <div class="row">
+            <button id="btnSearch" class="btn primary" type="button">Search</button>
+            <button id="btnReset" class="btn" type="button">Reset</button>
+          </div>
 
-      <div style="height:10px;"></div>
+          <div id="qHelp" class="help">Tip: Try “France”, “Jakarta”, “Sydney”, “United States”, or “Subud London”.</div>
 
-      <button class="btn" type="button" onclick="notify('Open Interactive World Map (simulated)')">
-        Open Interactive World Map
-      </button>
-    </div>
+          <div class="resultsMeta">
+            <b style="font-size:13px;">Results</b>
+            <span class="count" id="viewState">World view</span>
+          </div>
 
-    <!-- ABOUT -->
-    <div class="about">
-      <b>About this directory</b>
-      <p>
-        SubudCenters.com provides location and contact information for Subud centers worldwide.
-        All center information is maintained through a central database and updated by authorized contributors.
-      </p>
+          <div id="listBody">
+            <div class="empty">
+              <b>Start here:</b> use the search field, or pan/zoom the map and click a pin.<br/>
+              (Pins are generated from the approved database using latitude/longitude.)
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT -->
+      <section class="mapWrap" aria-label="Interactive map (Leaflet + OSM)">
+        <div class="mapTopbar">
+          <div class="mapBadge" id="mapBadge"><b>[Interactive Map]</b> OSM · Pan/Zoom · Click pins</div>
+          <div class="mapTools">
+            <button class="btn icon" id="btnMapReset" type="button" title="Reset map">↺</button>
+          </div>
+        </div>
+
+        <div id="map"></div>
+
+        <div class=" hookup legend" aria-label="Zone colour key (visual-only)">
+          <b>Zone colours (visual-only)</b>
+          <div class="sub" style="font-size:12px; margin-top:4px;">
+            Optional: align with WSA scheme; colours do not filter.
+          </div>
+          <div class="row2"><span class="swatch z1"></span><span>Zone 1 (teal)</span></div>
+          <div class="row2"><span class="swatch z7"></span><span>Zone 7 (mauve)</span></div>
+          <div class="row2"><span class="swatch z3"></span><span>Zone 3 (green)</span></div>
+          <div class="row2"><span class="swatch z8"></span><span>Zone 8 (blue)</span></div>
+        </div>
+      </section>
     </div>
 
     <footer>
@@ -178,16 +208,405 @@
     </footer>
   </div>
 
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <!-- Leaflet -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 
   <script>
-    const toast = document.getElementById('toast');
+    // -----------------------------
+    // 1) Dummy Centers (lat/lng)
+    // -----------------------------
+    const centers = [
+      {id:"FR-PAR-01", name:"Subud Paris Center", address:"Paris, France", country:"France", iso3:"FRA", lat:48.8566, lng:2.3522, zone:"3"},
+      {id:"FR-LYO-01", name:"Subud Lyon Center", address:"Lyon, France", country:"France", iso3:"FRA", lat:45.7640, lng:4.8357, zone:"3"},
+      {id:"GB-LON-01", name:"Subud London Center", address:"London, United Kingdom", country:"United Kingdom", iso3:"GBR", lat:51.5072, lng:-0.1276, zone:"3"},
+      {id:"NL-AMS-01", name:"Subud Amsterdam Center", address:"Amsterdam, Netherlands", country:"Netherlands", iso3:"NLD", lat:52.3676, lng:4.9041, zone:"3"},
+      {id:"ID-JKT-01", name:"Subud Jakarta Center", address:"Jakarta, Indonesia", country:"Indonesia", iso3:"IDN", lat:-6.2088, lng:106.8456, zone:"1"},
+      {id:"ID-BDG-01", name:"Subud Bandung Center", address:"Bandung, Indonesia", country:"Indonesia", iso3:"IDN", lat:-6.9175, lng:107.6191, zone:"1"},
+      {id:"AU-SYD-01", name:"Subud Sydney Center", address:"Sydney, Australia", country:"Australia", iso3:"AUS", lat:-33.8688, lng:151.2093, zone:"1"},
+      {id:"US-NYC-01", name:"Subud New York Center", address:"New York, United States", country:"United States", iso3:"USA", lat:40.7128, lng:-74.0060, zone:"7"},
+      {id:"US-SF-01", name:"Subud San Francisco Center", address:"San Francisco, United States", country:"United States", iso3:"USA", lat:37.7749, lng:-122.4194, zone:"7"},
+      {id:"ZA-JHB-01", name:"Subud Johannesburg Center", address:"Johannesburg, South Africa", country:"South Africa", iso3:"ZAF", lat:-26.2041, lng:28.0473, zone:"5"}
+    ];
+
+    // Optional: choose zone colours (approx / wireframe)
+    const zoneColors = {
+      "1": "#2aa9a1", // teal
+      "3": "#5aa85b", // green
+      "7": "#8b63b6", // mauve
+      "8": "#2f5bd6", // blue
+      "5": "#f59e0b"  // amber (example)
+    };
+
+    // -----------------------------
+    // 2) Map init (OSM)
+    // -----------------------------
+    const map = L.map('map', { zoomControl: true }).setView([20, 0], 2);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
+      maxZoom: 19
+    }).addTo(map);
+
+    const markersLayer = L.layerGroup().addTo(map);
+    const countryHighlightLayer = L.layerGroup().addTo(map);
+
+    // GeoJSON cache
+    let countriesData = null;
+
+    async function loadCountriesGeoJSON(){
+      if (countriesData) return countriesData;
+      const url = 'https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json';
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Failed to load countries GeoJSON");
+      countriesData = await res.json();
+      return countriesData;
+    }
+
+    // -----------------------------
+    // 3) Rendering pins (markers)
+    // -----------------------------
+    function renderMarkers(items){
+      markersLayer.clearLayers();
+
+      items.forEach(c => {
+        const marker = L.circleMarker([c.lat, c.lng], {
+          radius: 7,
+          weight: 2,
+          color: "#111827",
+          fillColor: "#ffffff",
+          fillOpacity: 1
+        }).addTo(markersLayer);
+
+        // hover popup preview (simple wireframe)
+        const popupHtml = `
+          <div style="min-width:220px;">
+            <div style="font-weight:800; margin-bottom:4px;">${escapeHtml(c.name)}</div>
+            <div style="font-size:12px; color:#4b5563;">${escapeHtml(c.address)}</div>
+            <div style="margin-top:8px; font-size:12px; color:#2563eb; font-weight:800;">Open</div>
+          </div>
+        `;
+        marker.bindPopup(popupHtml);
+
+        marker.on('mouseover', () => marker.openPopup());
+        marker.on('mouseout', () => marker.closePopup());
+
+        marker.on('click', () => {
+          notify(`Open Center Detail (simulated): ${c.id}`);
+          selectCenterInList(c.id);
+        });
+      });
+    }
+
+    function fitToMarkers(items){
+      if (!items.length) {
+        map.setView([20,0],2);
+        return;
+      }
+      const bounds = L.latLngBounds(items.map(x => [x.lat, x.lng]));
+      map.fitBounds(bounds.pad(0.6));
+    }
+
+    // -----------------------------
+    // 4) Country highlight (polygon overlay)
+    // -----------------------------
+    function clearCountryHighlights(){
+      countryHighlightLayer.clearLayers();
+    }
+
+    function highlightCountriesISO3(iso3List, color){
+      if (!countriesData) return;
+
+      iso3List.forEach(code => {
+        const feature = countriesData.features.find(f => {
+          const p = f.properties || {};
+          return p['ISO3166-1-Alpha-3'] === code;
+        });
+        if (!feature) return;
+
+        L.geoJSON(feature, {
+          style: {
+            fillColor: color,
+            fillOpacity: 0.25,
+            color: color,
+            weight: 2
+          }
+        }).addTo(countryHighlightLayer);
+      });
+    }
+
+    // Helper: apply “zone tint” by highlighting ALL countries in results with zone color
+    function applyZoneColourFromResults(items){
+      clearCountryHighlights();
+      if (!items.length) return;
+
+      // group countries by zone
+      const byZone = new Map();
+      items.forEach(c => {
+        if (!byZone.has(c.zone)) byZone.set(c.zone, new Set());
+        byZone.get(c.zone).add(c.iso3);
+      });
+
+      // draw highlights
+      for (const [zone, setCodes] of byZone.entries()){
+        const color = zoneColors[zone] || "#111827";
+        highlightCountriesISO3(Array.from(setCodes), color);
+      }
+    }
+
+    // -----------------------------
+    // 5) Search + List UI (wireflow)
+    // -----------------------------
+    const toast = createToast();
     function notify(msg){
       toast.textContent = msg;
       toast.classList.add('show');
       clearTimeout(notify._t);
-      notify._t = setTimeout(() => toast.classList.remove('show'), 1400);
+      notify._t = setTimeout(()=>toast.classList.remove('show'), 1400);
     }
+
+    function createToast(){
+      const el = document.createElement('div');
+      el.className = 'toast';
+      el.style.cssText = `
+        position:fixed; left:50%; bottom:16px; transform:translateX(-50%);
+        border:1px solid #e5e7eb; background:#fff; padding:10px 12px; border-radius:999px;
+        box-shadow:0 10px 28px rgba(17,24,39,.12);
+        opacity:0; pointer-events:none; transition:opacity .18s ease; max-width:92vw; z-index:9999;
+      `;
+      el.classList.add('toast');
+      document.body.appendChild(el);
+      return el;
+    }
+
+    const qEl = document.getElementById('q');
+    const qHelp = document.getElementById('qHelp');
+    const suggestEl = document.getElementById('suggest');
+    const listBody = document.getElementById('listBody');
+    const countLabel = document.getElementById('countLabel');
+    const viewState = document.getElementById('viewState');
+    const mapBadge = document.getElementById('mapBadge');
+
+    let lastSuggest = [];
+    let suggestIndex = -1;
+    let selectedId = "";
+
+    function setValidation(message){
+      if (message){
+        qHelp.textContent = message;
+        qHelp.classList.add('error');
+        qEl.classList.add('fieldError');
+      } else {
+        qHelp.textContent = 'Tip: Try “France”, “Jakarta”, “Sydney”, “United States”, or “Subud London”.';
+        qHelp.classList.remove('error');
+        qEl.classList.remove('fieldError');
+      }
+    }
+
+    function getSuggestions(q){
+      const qq = q.trim().toLowerCase();
+      if (qq.length < 2) return [];
+      const pool = new Map();
+      centers.forEach(x => {
+        [x.country, x.name].forEach(v => {
+          if (v.toLowerCase().includes(qq)) pool.set(v, true);
+        });
+      });
+      return Array.from(pool.keys()).sort().slice(0, 8);
+    }
+
+    function showSuggestions(items){
+      lastSuggest = items;
+      suggestIndex = -1;
+      if (!items.length){ hideSuggestions(); return; }
+      suggestEl.innerHTML = items.map((t,i)=>
+        `<button type="button" role="option" aria-selected="false">${escapeHtml(t)}</button>`
+      ).join("");
+      suggestEl.classList.add('show');
+
+      suggestEl.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', ()=>{
+          qEl.value = btn.textContent;
+          hideSuggestions();
+          runSearch();
+        });
+      });
+    }
+    function hideSuggestions(){
+      suggestEl.classList.remove('show');
+      suggestEl.innerHTML = '';
+      lastSuggest = [];
+      suggestIndex = -1;
+    }
+    function moveSuggestion(delta){
+      const buttons = Array.from(suggestEl.querySelectorAll('button'));
+      if (!buttons.length) return;
+      suggestIndex = Math.max(0, Math.min(buttons.length - 1, suggestIndex + delta));
+      buttons.forEach((b,idx)=>b.setAttribute('aria-selected', idx===suggestIndex ? 'true':'false'));
+      buttons[suggestIndex].scrollIntoView({block:'nearest'});
+    }
+
+    function filterCenters(q){
+      const qq = (q || "").trim().toLowerCase();
+      if (!qq) return [];
+      return centers.filter(x => {
+        const hay = (x.country + " " + x.name + " " + x.address).toLowerCase();
+        return hay.includes(qq);
+      });
+    }
+
+    function renderList(items, q){
+      countLabel.textContent = `${items.length} found`;
+
+      if (!q){
+        listBody.innerHTML = `
+          <div class="empty">
+            <b>Start here:</b> use the search field, or pan/zoom the map and click a pin.<br/>
+            (Pins are generated from the approved database using latitude/longitude.)
+          </div>
+        `;
+        return;
+      }
+
+      if (!items.length){
+        listBody.innerHTML = `
+          <div class="empty">
+            <b>No results</b> for <b>${escapeHtml(q)}</b>.<br/>
+            Try a broader location (e.g., country), or a center name.
+          </div>
+        `;
+        return;
+      }
+
+      listBody.innerHTML = `<div class="list">${
+        items.map(x=>`
+          <div class="item ${x.id===selectedId ? 'active':''}" data-id="${escapeHtml(x.id)}">
+            <div>
+              <p class="name">${escapeHtml(x.name)}</p>
+              <p class="meta">${escapeHtml(x.address)}</p>
+            </div>
+            <div class="open">Open</div>
+          </div>
+        `).join("")
+      }</div>`;
+
+      listBody.querySelectorAll('.item').forEach(el => {
+        el.addEventListener('click', ()=>{
+          const id = el.dataset.id;
+          selectedId = id;
+          selectCenterInList(id);
+          notify(`Open Center Detail (simulated): ${id}`);
+        });
+      });
+    }
+
+    function selectCenterInList(id){
+      selectedId = id || "";
+      listBody.querySelectorAll('.item').forEach(i => i.classList.toggle('active', i.dataset.id===selectedId));
+    }
+
+    function setViewLabel(text){
+      viewState.textContent = text;
+      mapBadge.innerHTML = `<b>[Interactive Map]</b> ${escapeHtml(text)} · Pan/Zoom · Click pins`;
+    }
+
+    function runSearch(){
+      const q = (qEl.value || "").trim();
+      if (q.length && q.length < 2){
+        setValidation("Please type at least 2 characters.");
+        return;
+      }
+      setValidation(null);
+      hideSuggestions();
+
+      if (!q){
+        resetAll();
+        return;
+      }
+
+      const items = filterCenters(q);
+      renderList(items, q);
+
+      // Map behavior: show pins for results and zoom there
+      renderMarkers(items);
+      fitToMarkers(items);
+
+      // Optional: highlight countries in results using zone colours
+      applyZoneColourFromResults(items);
+
+      setViewLabel(items.length ? `Results view: ${q}` : `No results: ${q}`);
+      notify("Results updated");
+    }
+
+    async function resetAll(){
+      qEl.value = "";
+      selectedId = "";
+      setValidation(null);
+      hideSuggestions();
+
+      renderList([], "");
+      renderMarkers(centers);     // show all pins in world view (wireframe choice)
+      calmlyWorldView();
+
+      clearCountryHighlights();   // no country tint
+      setViewLabel("World view");
+      notify("Reset");
+    }
+
+    function calmlyWorldView(){
+      map.setView([20,0],2);
+    }
+
+    function escapeHtml(s){
+      return String(s)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    // Events
+    document.getElementById('btnSearch').addEventListener('click', runSearch);
+    document.getElementById('btnReset').addEventListener('click', resetAll);
+    document.getElementById('btnMapReset').addEventListener('click', resetAll);
+
+    qEl.addEventListener('input', ()=>{
+      const val = qEl.value || "";
+      if (val.trim().length >= 2) showSuggestions(getSuggestions(val));
+      else hideSuggestions();
+    });
+    qEl.addEventListener('keydown', (e)=>{
+      if (suggestEl.classList.contains('show')){
+        if (e.key === 'ArrowDown'){ e.preventDefault(); moveSuggestion(1); }
+        if (e.key === 'ArrowUp'){ e.preventDefault(); moveSuggestion(-1); }
+        if (e.key === 'Escape'){ hideSuggestions(); }
+        if (e.key === 'Enter' && suggestIndex >= 0){
+          e.preventDefault();
+          const btns = Array.from(suggestEl.querySelectorAll('button'));
+          qEl.value = btns[suggestIndex].textContent;
+          hideSuggestions();
+          runSearch();
+          return;
+        }
+      }
+      if (e.key === 'Enter') runSearch();
+    });
+    document.addEventListener('click', (e)=>{
+      if (!e.target.closest('.typeaheadWrap')) hideSuggestions();
+    });
+
+    // Boot
+    (async function init(){
+      try{
+        await loadCountriesGeoJSON();
+        renderMarkers(centers);
+        setViewLabel("World view");
+      }catch(err){
+        console.warn(err);
+        setViewLabel("Map loaded (without country polygons)");
+        renderMarkers(centers);
+      }
+    })();
   </script>
 </body>
 </html>
